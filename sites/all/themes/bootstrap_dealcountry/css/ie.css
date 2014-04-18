@@ -1,0 +1,205 @@
+
+
+.ie7 .presentation .btn.form-submit,
+.ie8 .presentation .btn.form-submit,
+.ie7 .presentation .col-sm-5 .content-home, 
+.ie7 .presentation .col-sm-3 .content-home, 
+.ie7 .presentation .col-sm-4 .content-home,
+.ie8 .presentation .col-sm-5 .content-home, 
+.ie8 .presentation .col-sm-3 .content-home, 
+.ie8 .presentation .col-sm-4 .content-home,
+.ie7 .view-most-popular-deals .masonry-item,
+.ie8 .view-most-popular-deals .masonry-item,
+.ie7.node-type-deal .group-deal-buy-section a.deal-price,
+.ie8.node-type-deal .group-deal-buy-section a.deal-price,
+.ie8.node-type-deal .group-deal-buy-section .field-name-link,
+.ie7.node-type-deal .group-deal-buy-section a.deal-price-gif,
+.ie8.node-type-deal .group-deal-buy-section a.deal-price-gif,
+.ie8.node-type-deal  .field-name-gifcard-link,
+.ie7.node-type-deal .panel-default > .panel-heading,
+.ie8.node-type-deal .panel-default > .panel-heading { 
+behavior: url(/sites/all/libraries/PIE-2.0beta1/PIE.php);
+}
+
+
+
+.ie7 .presentation .col-sm-5 .content-home, 
+.ie7 .presentation .col-sm-3 .content-home, 
+.ie7 .presentation .col-sm-4 .content-home,
+.ie8 .presentation .col-sm-5 .content-home, 
+.ie8 .presentation .col-sm-3 .content-home, 
+.ie8 .presentation .col-sm-4 .content-home {background: url(../images/filter-white-80.png) repeat; box-shadow: none;  
+-moz-border-radius: 20px; -webkit-border-radius: 20px; -o-border-radius: 20px; -khtml-border-radius: 20px; border-radius: 20px; 
+}
+
+.ie7 .presentation .col-sm-4.col-sm-offset-3 {margin-left: 10%; width: 328px}
+
+
+.ie7 #user-register-form .hybridauth-widget-provider,
+.ie8 #user-register-form .hybridauth-widget-provider {width: 200px; height: 34px; position: relative; right: 0px;
+display: block; background: url("../images/X-Large_200x34.png") no-repeat }
+.ie7 #user-register-form .hybridauth-widget-provider *,
+.ie8 #user-register-form .hybridauth-widget-provider * {filter: alpha(opacity=0)}
+
+.ie7 [class^="icon-"]:before, .ie7 [class*=" icon-"]:before {display: inline; zoom: 1}
+
+.ie7 .input-group, .ie7 #edit-field-city {position: relative; height: 41px; display: block}
+.ie7 .presentation .input-group-addon {background: url(../images/login-icons.jpg) no-repeat; position: absolute; top: 5px; left: 7px; z-index: 30; border: 0}
+.ie7 .presentation .input-group-pass .input-group-addon {background-position: -42px 0}
+.ie7 .presentation .input-group-city .input-group-addon {background-position: -84px 0}
+.ie7 .presentation .form-control {border-left: 1px solid #1px solid #CCCCCC}
+
+.ie7 .presentation #edit-field-city {top: 3px; position: relative}
+.ie7 .presentation .input-group-pass input {position: absolute; top: 0; left: 0; z-index: 10}
+
+.ie7 .presentation .form-control.form-text {padding: 12px 0 0 40px; width: 223px; height: 30px}
+
+.view-deals-front.option-list .masonry-item {}
+.view-deals-front .masonry-item {}
+
+
+/* ENCABEZADO */
+.ie7 .deal-search input {height: 24px; padding-top: 10px} 
+
+
+
+/* INTERNA */
+.ie7 .btn-group.search {position: relative}
+.ie7 .btn-group.search .input-group-btn {position: absolute; top: 0; right: 0; left: auto; bottom: auto}
+
+.ie8 .navbar-default .navbar-nav > .active > a {filter: none}
+
+.ie7 .views-widget-filter-combine-custom,
+.ie7 .form-item-sort-bef-combine,
+.ie7 .form-item-field-deal-categories-tid {position: relative; width: 260px}
+.ie7 .form-item-field-deal-categories-tid {width: 270px}
+
+
+.ie7 .views-widget-filter-combine-custom *,
+.ie7 .form-item-sort-bef-combine *,
+.ie7 .form-item-field-deal-categories-tid * {float: left}
+
+.ie7 .views-widget-filter-combine-custom label,
+.ie7 .form-item-sort-bef-combine label,
+.ie7 .form-item-field-deal-categories-tid label {margin-right: 5px}
+
+.ie7 .views-widget-filter-combine-custom label {padding-top: 8px}
+
+.ie7 .views-widget-filter-combine-custom label {margin-top: 8px}
+.ie7 .form-item-sort-bef-combine label {margin-top: 6px}
+.ie7 .form-item-field-deal-categories-tid label {margin-top: 10px}
+
+.ie7 .views-widget-filter-combine-custom input,
+.ie7 .form-item-sort-bef-combine select,
+.ie7 .form-item-field-deal-categories-tid select {width: 135px}
+
+.ie7 .views-exposed-form .views-widget-filter-combine, 
+.ie7 .deal-search .views-widget-filter-combine-custom {}
+
+.ie7 .view-deals-front.option-list .deal-style-list > div {display: block; float: left; width: 74%}
+.ie7 .view-deals-front.option-list .deal-style-list > div.table-1 {float: left; width: 25%; margin-right: 5px}
+
+.ie7 .view-deals-front.option-list .masonry-item .field-name-field-deal-image-thumb {width: 182px}
+.ie7 .view-deals-front.option-list .masonry-item img {top: auto; bottom: auto; left: auto; right: auto; height: auto}
+.ie7 .view-deals-front.option-list .masonry-item {float: none}
+.ie7 .view-deals-front.ie-grid-list .masonry-item {float: left; clear: none}
+.ie7 .view-deals-front.ie-grid-list .image-content {position: relative}
+.ie7 .view-deals-front.ie-grid-list .image-content-over {right: auto; left: 0}
+
+.ie7 .view-deals-front.option-list .masonry-item .group-info-footer {display: block; width: 102%; background: transparent}
+.ie7 .group-info-footer .footer-left,
+.ie7 .group-info-footer .footer-right {float: left; display:block}
+
+.ie7 .group-info-footer .footer-left {width: 37%}
+.ie7 .group-info-footer .footer-right {width: 55%}
+
+
+
+.ie7 .deal-style-list {position: relative}
+.ie7 .view-deals-front .image-content-over {left: auto; bottom: auto; right: 0; top: auto; bottom: 0; 
+background: transparent;-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#B2E3E9F1,endColorstr=#B2E3E9F1)"; /* IE8 */    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#B2E3E9F1,endColorstr=#B2E3E9F1);   /* IE6 & 7 */      zoom: 1;
+}
+.ie7 .view-deals-front .image-content {position: static}
+
+
+/* COLUMNAS */
+.ie7 section.col-sm-9 {width: 68% }
+.ie7 aside.col-sm-3 {}
+
+/* SIDEBAR */
+.ie7 .view-most-popular-deals .group-info-header-mp > div {float: left}
+.ie7 .view-most-popular-deals .field-name-field-deal-purchased-qty-mp {float: left; width: 60px; height: 80px}
+.ie7 .view-most-popular-deals .field-name-field-deal-purchased-qty-mp span {display: block; margin-top: 25px}
+
+
+.ie7 .footer .row {clear: both}
+.ie7 .footer aside {width: 225px}
+.ie7 .footer aside + aside {width: 235px}
+.ie7 .footer aside + aside + aside{width: 225px}
+
+
+.ie7 .navbar-nav > li > a, .ie7 .navbar-default .navbar-nav > .active > a {height: 40px; filter: none; line-height: 40px}
+.ie8 .navbar-nav > li > a, .ie8 .navbar-default .navbar-nav > .active > a {height: 67px; filter: none; line-height: 40px}
+
+.ie7 #block-views-exp-deals-front-page {height: 85px}
+
+
+/* PRODUCTO INTERNA */
+.ie7.node-type-deal .node-type-deal .field-name-field-deal-image img {max-width: 335px}
+.ie7.field-name-field-deal-image {width: 46%}
+.ie7.node-type-deal .field-name-field-deal-image {width: 340px; float: left}
+.ie7.node-type-deal .group-deal-info.panel {width: 360px; position: relative; z-index:200; zoom: 1}
+.ie7.node-type-deal .group-deal-buy-section > div {width: 42%; float: left; display: block}
+
+.ie7.node-type-deal .group-deal-buy-section a.deal-price {position: relative;  display: block}
+.ie7.node-type-deal .group-deal-buy-section a.deal-price .dp-left {float:left; display: block; 
+height: 66px; width: 42px; background: url(../images/arrow-red-left.jpg) no-repeat 0 19px}
+.ie7.node-type-deal .group-deal-buy-section a.deal-price .dp-right {width: 92px; display: block; float: left}
+
+.ie7.node-type-deal .group-deal-buy-section a.deal-price-gif {position: relative; display: block}
+.ie7.node-type-deal .group-deal-buy-section a.deal-price-gif .dpg-left {float:left; display: block;
+ height: 44px; width: 38px; background: url(../images/gift-icon.jpg) no-repeat 3px 5px}
+.ie7.node-type-deal .group-deal-buy-section a.deal-price-gif .dpg-right {width: 72px; display: block; float: left}
+
+ 
+.ie7.node-type-deal .group-deal-data {display: block}
+.ie7.node-type-deal .group-deal-data > div {float: left; display: block; width: 44%; margin-left: 20px} 
+
+
+.ie7.node-type-deal .group-deal-map .panel-heading,
+.ie7.node-type-deal .group-deal-map .panel-body {padding-right: 0; width: 294px}
+
+.ie7 .group-deal-info .field-name-link {margin-right: 20px}
+
+.ie8.node-type-deal .group-deal-buy-section a.deal-price {background: #BE071C !important; display: block !important; float: left}
+.ie8.node-type-deal .group-deal-buy-section .field-name-link {border-radius: 15px; background: #BE071C; overflow: hidden; position: relative}
+.ie8.node-type-deal  .field-name-gifcard-link {border: 1px dashed #CCCCCC; border-radius: 15px; position: relative}
+
+
+.ie7 .btn-group.deal-list .icon-menu {background: url(../images/ico-list.jpg) no-repeat 0 0; width: 19px; height: 15px; float: left; display: block; margin-top: 3px}
+.ie7 .btn-group.deal-list .icon-th {background: url(../images/ico-grid.jpg) no-repeat 0 0; width: 19px; height: 15px; float: left; display: block; margin-top: 3px}
+
+
+
+/* MODAL */
+.ie7 .view-selected-deal .field.field-name-field-deal-image-thumb {width: 120px}
+.ie7 .view-selected-deal .selected-deal-content,
+.ie7 .view-selected-deal .selected-deal-prices {width: 440px}
+
+.ie7 #edit-submitted-personal-info--2,
+.ie7 #edit-submitted-shipping-address-content--2 {width: 280px;/* padding: 0*/}
+
+.ie7 #edit-submitted-personal-info--2 .panel-body,
+.ie7 #edit-submitted-shipping-address-content--2 .panel-body {padding: 0}
+
+.ie7 #edit-submitted-personal-info--2 {margin-left: 20px}
+
+.ie7 #cboxContent .form-text {height: auto; padding: 0}
+
+.ie7 .deal-price-gif {cursor: pointer}
+
+.ie7 .webform-client-form .view-selected-deal .selected-deal-prices {}
+.ie7 .webform-client-form .view-selected-deal .group-info-footer > div {float: left; display: block; width: 110px}
+
+
+/* end here */

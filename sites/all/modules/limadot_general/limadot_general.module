@@ -1,0 +1,594 @@
+<?php
+/*
+ *
+ * 
+ */
+ 
+function limadot_general_init() {
+	/*drupal_add_css('http://fonts.googleapis.com/css?family=Lato:100,300,400,100italic', 'external');
+	drupal_add_css('http://fonts.googleapis.com/css?family=Arvo:400,700,400italic,700italic', 'external');*/
+	$path = $_GET['q'];
+	drupal_add_js(drupal_get_path('module', 'limadot_general').'/scripts/jquery.placeholder.js', array('type' => 'file'));
+	drupal_add_js(drupal_get_path('module', 'limadot_general').'/js/limadot_general.js', array('type' => 'file'));	
+	drupal_add_js(array('limadot_general' => array('option_list_selected' => 'list')), 'setting');
+	if($path == 'deals/local' || $path == 'deals/products' || $path == 'deals/getaways') {
+		drupal_add_js('https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places', 'external');
+		drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/jquery-ajaxtransport-xdomainrequest/1.0.0/jquery.xdomainrequest.min.js', 'external');
+		/*
+		drupal_add_css(drupal_get_path('module', 'limadot_general').'/scripts/bootstrap-editable/css/bootstrap-editable.css', array('type' => 'file', 'scope' => 'footer', 'weight' => 9999));
+		drupal_add_js(drupal_get_path('module', 'limadot_general').'/scripts/bootstrap-editable/js/bootstrap-editable.min.js', array('type' => 'file', 'scope' => 'footer', 'weight' => 9999));
+		drupal_add_js(drupal_get_path('module', 'limadot_general').'/scripts/typeahead/lib/typeahead.js', array('type' => 'file', 'scope' => 'footer', 'weight' => 9999));
+		drupal_add_js(drupal_get_path('module', 'limadot_general').'/scripts/typeahead/typeaheadjs.js', array('type' => 'file', 'scope' => 'footer', 'weight' => 9999));
+		drupal_add_css(drupal_get_path('module', 'limadot_general').'/scripts/typeahead/lib/typeahead.js-bootstrap.css', array('type' => 'file', 'scope' => 'footer', 'weight' => 9999));
+		drupal_add_js(drupal_get_path('module', 'limadot_general').'/js/google_maps.js', 'file');
+		drupal_add_js(drupal_get_path('module', 'limadot_general').'/scripts/bootstrap-select/bootstrap-select.min.js');
+		drupal_add_css(drupal_get_path('module', 'limadot_general').'/scripts/bootstrap-select/bootstrap-select.min.css');	
+		*/
+		
+		drupal_add_css(drupal_get_path('module', 'limadot_general').'/scripts/bootstrap-editable/css/bootstrap-editable.css', array('type' => 'file'));
+		drupal_add_js(drupal_get_path('module', 'limadot_general').'/scripts/bootstrap-editable/js/bootstrap-editable.min.js', array('type' => 'file', 'scope' => 'footer', 'weight' => 9998));
+		drupal_add_js(drupal_get_path('module', 'limadot_general').'/scripts/typeahead/lib/typeahead.js', array('type' => 'file', 'scope' => 'footer', 'weight' => 9998));
+		drupal_add_js(drupal_get_path('module', 'limadot_general').'/scripts/typeahead/typeaheadjs.js', array('type' => 'file', 'scope' => 'footer', 'weight' => 9998));
+		drupal_add_css(drupal_get_path('module', 'limadot_general').'/scripts/typeahead/lib/typeahead.js-bootstrap.css', array('type' => 'file'));	
+		drupal_add_js(drupal_get_path('module', 'limadot_general').'/scripts/bootstrap-select/bootstrap-select.min.js', array('type' => 'file', 'scope' => 'footer', 'weight' => 9998));
+		drupal_add_css(drupal_get_path('module', 'limadot_general').'/scripts/bootstrap-select/bootstrap-select.min.css', array('type' => 'file'));
+		drupal_add_js(drupal_get_path('module', 'limadot_general').'/js/google_maps.js', array('type' => 'file', 'scope' => 'footer', 'weight' => 9999));
+		/*print '
+		<script type="text/javascript" src="'. drupal_get_path('module', 'limadot_general').'/scripts/bootstrap-editable/js/bootstrap-editable.min.js' .'"></script>
+		<script type="text/javascript" src="'. drupal_get_path('module', 'limadot_general').'/scripts/typeahead/lib/typeahead.js' .'"></script>
+		<script type="text/javascript" src="'. drupal_add_js(drupal_get_path('module', 'limadot_general').'/scripts/typeahead/typeaheadjs.js' .'"></script>
+		<script type="text/javascript" src="'. drupal_get_path('module', 'limadot_general').'/js/google_maps.js' .'"></script>
+		<script type="text/javascript" src="'. drupal_get_path('module', 'limadot_general').'/scripts/bootstrap-select/bootstrap-select.min.js' .'"></script>
+		';*/
+	}
+	//dpm(limadot_general_get_location());
+}
+
+function limadot_general_views_query_alter(&$view, &$query) { 
+	if ($view->name == 'deals_front') {
+		//if (isset($query->where[2]["conditions"][7]))
+			//$query->where[2]["conditions"][7]["field"] = "field_data_field_deal_categories.field_deal_categories_tid";
+		/*if(isset($_GET["field_deal_categories_tid"]) && is_numeric($_GET["field_deal_categories_tid"])) {
+			//$query->where[2]["conditions"][7]["field"] = "field_data_field_deal_categories.field_deal_categories_tid";
+			$query->where[2]["conditions"][7]["value"] = "";
+			$query->where[2]["conditions"][7]["value"] = $_GET["field_deal_categories_tid"];
+			$query->where[2]["conditions"][7]["operator"] = "=";
+		}*/
+		//unset($query->where[2]);
+		//dpm($query);
+		if(isset($query->where[0]['conditions'][1]) && $query->where[0]['conditions'][1]["field"] == "node.title") {
+			$query->where[0]['conditions'][1]['operator'] = 'LIKE';
+      		$query->where[0]['conditions'][1]['value'] = '%' . $query->where[0]['conditions'][1]['value'] . '%';
+		}
+	}	
+}
+
+function limadot_general_form_alter(&$form, &$form_state, $form_id) {
+	
+	switch ($form_id) {
+	case 'views_exposed_form':
+		if( $form["#id"] == "views-exposed-form-deals-front-page" || $form["#id"] == "views-exposed-form-deals-front-page-1" ) {
+			//dpm($form);
+			//$form["field_deal_categories_tid"]["#options"]["All"] = theme('icon', array('bundle' => 'fontello_pack_01', 'icon' => 'icon-dollar'))." ".t("All");
+			/*if(isset($_GET["title"]))
+				$form["title_in"]["#value"] = $_GET["title"];
+			$form["title_in"]["#prefix"] = '<div style="display:none">';
+			$form["title_in"]["#suffix"] = '</div>';
+			if(isset($_GET["field_deal_categories_tid"]))
+				$form["field_deal_categories_tid_2"]["#value"] = $_GET["field_deal_categories_tid"];
+			$form["field_deal_categories_tid_2"]["#prefix"] = '<div style="display:none">';
+			$form["field_deal_categories_tid_2"]["#suffix"] = '</div>';*/
+			unset($form["sort_bef_combine"]["#options"]["created ASC"]);
+			unset($form["sort_bef_combine"]["#options"]["field_deal_purchased_qty_value ASC"]);
+			unset($form["sort_bef_combine"]["#options"]["field_deal_ending_time_value DESC"]);
+			unset($form["sort_bef_combine"]["#options"]["field_deal_price_value_value DESC"]);
+			unset($form["sort_bef_combine"]["#options"]["field_deal_discount_value ASC"]);
+			$form["combine"]["#size"] = 20;
+			$form["combine"]["#weight"] = 5;
+			$form["title"]["#size"] = 13;
+			$form["title"]["#weight"] = 2;
+			$form["title"]['#attributes']["placeholder"] = t("Search by title");
+			$form["sort_bef_combine"]["#weight"] = 1;
+			//$form["sort_bef_combine"]["#options"]["field_deal_price_value_value ASC"]['#attributes'] = array('data-icon' => 'icon-heart');
+			//$form["sort_bef_combine"]["#options"]['#extra_option_attributes'] = array('field_deal_price_value_value ASC' => array('data-icon' => 'icon-heart') );			
+			if(isset($form["field_deal_categories_tid"]["#options"]["All"]))
+				$form["field_deal_categories_tid"]["#options"]["All"] = t("All");			
+			
+			global $_SESSION;
+			$location = array();
+			$default_location = "";
+			$path = $_GET['q'];
+			
+			if($path == 'deals/local') {
+				if ( ! isset($_SESSION["views"]["deals_front"]["default"]["country"]) ) {
+					$items = limadot_general_get_location ();
+					$_SESSION["views"]["deals_front"]["default"]["city"] = (isset($items["city_name"]))?$items["city_name"]:'';
+					$_SESSION["views"]["deals_front"]["default"]["province"] = (isset($items["province_code"]))?$items["province_code"]:'All';
+					$_SESSION["views"]["deals_front"]["default"]["province_name"] = (isset($items["province_name"]))?$items["province_name"]:$_SESSION["views"]["deals_front"]["default"]["province"];
+					$_SESSION["views"]["deals_front"]["default"]["country"] = (isset($items["country_code"]))?$items["country_code"]:'ca';
+				}
+				if(isset($_SESSION["views"]["deals_front"]["default"]["city"]) && $_SESSION["views"]["deals_front"]["default"]["city"] != "") {
+					$location[] = $_SESSION["views"]["deals_front"]["default"]["city"];
+				}				
+				if(isset($_SESSION["views"]["deals_front"]["default"]["province"]) && $_SESSION["views"]["deals_front"]["default"]["province"] != "All") {
+					if(isset($_SESSION["views"]["deals_front"]["default"]["province_name"])) 
+						$location[] = $_SESSION["views"]["deals_front"]["default"]["province_name"];
+					else {
+						$location[] = $_SESSION["views"]["deals_front"]["default"]["province"];
+						$_SESSION["views"]["deals_front"]["default"]["province_name"] = $_SESSION["views"]["deals_front"]["default"]["province"];
+					}
+						
+				}				
+				if(isset($_SESSION["views"]["deals_front"]["default"]["country"]) && $_SESSION["views"]["deals_front"]["default"]["country"] != "All")
+					$location[] = location_country_name($_SESSION["views"]["deals_front"]["default"]["country"]);
+				$default_location = implode(', ', $location);
+				$form["combine"]["#default_value"] = $default_location;
+				$form["country"]["#default_value"] = isset($_SESSION["views"]["deals_front"]["default"]["country"])?$_SESSION["views"]["deals_front"]["default"]["country"]:'ca';
+				if(isset($_SESSION["views"]["deals_front"]["default"]["province"])) {
+					$form["province"]["#options"] = array('All' => '-Any-', $_SESSION["views"]["deals_front"]["default"]["province"] => $_SESSION["views"]["deals_front"]["default"]["province_name"]);
+					$form["province"]["#default_value"] = $_SESSION["views"]["deals_front"]["default"]["province"];
+				}
+				$form["province"]["#default_value"] = isset($_SESSION["views"]["deals_front"]["default"]["province"])?$_SESSION["views"]["deals_front"]["default"]["province"]:'All';	
+				$form["city"]["#default_value"] = isset($_SESSION["views"]["deals_front"]["default"]["city"])?$_SESSION["views"]["deals_front"]["default"]["city"]:'';
+				$_SESSION["views"]["deals_front"]["page_1"] = $_SESSION["views"]["deals_front"]["default"];
+				
+			} elseif($path == 'deals/products') {
+			
+				if ( ! isset($_SESSION["views"]["deals_front"]["page_1"]["country"]) ) {
+					$items = limadot_general_get_location ();
+					$_SESSION["views"]["deals_front"]["page_1"]["city"] = (isset($items["city_name"]))?$items["city_name"]:'';
+					$_SESSION["views"]["deals_front"]["page_1"]["province"] = (isset($items["province_code"]))?$items["province_code"]:'All';
+					$_SESSION["views"]["deals_front"]["page_1"]["province_name"] = (isset($items["province_name"]))?$items["province_name"]:$_SESSION["views"]["deals_front"]["page_1"]["province"];
+					$_SESSION["views"]["deals_front"]["page_1"]["country"] = (isset($items["country_code"]))?$items["country_code"]:'ca';
+				}
+				if(isset($_SESSION["views"]["deals_front"]["page_1"]["city"]) && $_SESSION["views"]["deals_front"]["page_1"]["city"] != "") {
+					$location[] = $_SESSION["views"]["deals_front"]["page_1"]["city"];
+				}				
+				if(isset($_SESSION["views"]["deals_front"]["page_1"]["province"]) && $_SESSION["views"]["deals_front"]["page_1"]["province"] != "All") {
+					if(isset($_SESSION["views"]["deals_front"]["page_1"]["province_name"])) 
+						$location[] = $_SESSION["views"]["deals_front"]["page_1"]["province_name"];
+					else {
+						$location[] = $_SESSION["views"]["deals_front"]["page_1"]["province"];
+						$_SESSION["views"]["deals_front"]["page_1"]["province_name"] = $_SESSION["views"]["deals_front"]["page_1"]["province"];
+					}
+						
+				}				
+				if(isset($_SESSION["views"]["deals_front"]["page_1"]["country"]) && $_SESSION["views"]["deals_front"]["page_1"]["country"] != "All")
+					$location[] = location_country_name($_SESSION["views"]["deals_front"]["page_1"]["country"]);
+				$default_location = implode(', ', $location);
+				$form["combine"]["#default_value"] = $default_location;
+				$form["country"]["#default_value"] = isset($_SESSION["views"]["deals_front"]["page_1"]["country"])?$_SESSION["views"]["deals_front"]["page_1"]["country"]:'ca';
+				if(isset($_SESSION["views"]["deals_front"]["page_1"]["province"])) {
+					$form["province"]["#options"] = array('All' => '-Any-', $_SESSION["views"]["deals_front"]["page_1"]["province"] => $_SESSION["views"]["deals_front"]["page_1"]["province_name"]);
+					$form["province"]["#default_value"] = $_SESSION["views"]["deals_front"]["page_1"]["province"];
+				}
+				$form["province"]["#default_value"] = isset($_SESSION["views"]["deals_front"]["page_1"]["province"])?$_SESSION["views"]["deals_front"]["page_1"]["province"]:'All';	
+				$form["city"]["#default_value"] = isset($_SESSION["views"]["deals_front"]["page_1"]["city"])?$_SESSION["views"]["deals_front"]["page_1"]["city"]:'';
+				$_SESSION["views"]["deals_front"]["default"] = $_SESSION["views"]["deals_front"]["page_1"];
+			}	
+			
+			$form["#theme"] = array('limadot_general_custom_search_form');
+			
+		}  elseif($form["#id"] == "views-exposed-form-deals-front-page-2" ) {
+			unset($form["sort_bef_combine"]["#options"]["created ASC"]);
+			unset($form["sort_bef_combine"]["#options"]["field_deal_purchased_qty_value ASC"]);
+			unset($form["sort_bef_combine"]["#options"]["field_deal_ending_time_value DESC"]);
+			unset($form["sort_bef_combine"]["#options"]["field_deal_price_value_value DESC"]);
+			unset($form["sort_bef_combine"]["#options"]["field_deal_discount_value ASC"]);
+			$form["combine"]["#size"] = 25;
+			$form["combine"]["#weight"] = 5;
+			$form["title"]["#size"] = 20;
+			$form["title"]["#weight"] = 2;
+			$form["title"]['#attributes']["placeholder"] = t("Search by title");
+			$form["sort_bef_combine"]["#weight"] = 1;
+
+			$location = array();
+			$default_location = "";			
+
+			$urls_canada = array( array("filter_country" => "ca", "filter_province" => "ON", "filter_city" => "Toronto"), array("filter_country" => "ca", "filter_province" => "BC", "filter_city" => "Vancouver"), array("filter_country" => "ca", "filter_province" => "ON", "filter_city" => "Niagara Falls"), array("filter_country" => "ca", "filter_province" => "QC", "filter_city" => "Montreal"), array("filter_country" => "ca", "filter_province" => "NS", "filter_city" => "Halifax"), array("filter_country" => "ca", "filter_province" => "AB", "filter_city" => "Calgary"), array("filter_country" => "ca", "filter_province" => "ON", "filter_city" => "Ottawa") );
+			
+			$urls_usa = array( array("filter_country" => "us", "filter_province" => "IL", "filter_city" => "Chicago"), array("filter_country" => "us", "filter_province" => "NY", "filter_city" => "New York"), array("filter_country" => "us", "filter_province" => "CA", "filter_city" => "Los Angeles"), array("filter_country" => "us", "filter_province" => "NV", "filter_city" => "Las Vegas"), array("filter_country" => "us", "filter_province" => "FL", "filter_city" => "Miami"), array("filter_country" => "us", "filter_province" => "CA", "filter_city" => "San Francisco"), array("filter_country" => "us", "filter_province" => "WV", "filter_city" => "Washington DC") );
+			
+			$content = '<div id="popover-cities" style="display:none"><div class="cities-list"><div><span>Canada</span><ul>';
+			foreach ($urls_canada as $key => $value) {
+				$content .= '<li><a class="canada" id="'.$key.'">'.$value["filter_city"].'</a></li>';
+			}
+			$content .= '</ul></div><div><span>United States</span><ul>';
+			foreach ($urls_usa as $key => $value) {
+				$content .= '<li><a class="usa" id="'.$key.'">'.$value["filter_city"].'</a></li>';
+			}
+			$content .= "</ul></div></div></div>";
+			$form["cities"] = array("#type" => "markup", "#markup" => $content);
+			
+			if(isset($form["field_deal_categories_tid"]["#options"]["All"]))				
+				$form["field_deal_categories_tid"]["#options"]["All"] = t("All");
+			$form["#theme"] = array('limadot_general_custom_search_getaways_form');			
+		}    		
+      break;
+	  
+	  case 'webform_client_form_2009':
+	  	$nid = $form["submitted"]["product_information"]["product_id"]["#value"];
+		if($nid != "") {
+			global $base_url;
+			$node = node_load($nid);
+			$form["submitted"]["product_information"]["product_name"]["#value"] = $node->title;
+			$form["submitted"]["product_information"]["product_url"]["#value"] = $base_url."/node/".$node->nid;
+			$form["submitted"]["product_information"]["product_url_source"]["#value"] = $node->field_deal_url["und"][0]["value"];
+		}
+	  break;
+	  
+	  case 'user_register_form':
+	    $path = $_GET['q'];
+	    if($path != "admin/people/create") {
+	  		$form['#prefix'] = '<div class="logo-home"><img alt="Home" src="/sites/default/files/deal_country_logo_letras_negras.png"></div><h1>SIGN UP</h1>';
+			$form['#suffix'] = '<div class="footer-home">'.l(t("SKIP & GO TO THE DEALS"), "deals/local").'</div>';
+			$form["account"]["name"]["#description"] = "";
+			$form["account"]["mail"]["#description"] = "";
+			$form["account"]["pass"]["#description"] = "";
+			$form['account']['pass']['#type'] = 'password';
+	    	$form['account']['pass']['#title'] = 'Password';
+			$form['actions']['submit']['#value'] = t('SIGN UP');
+			$form["account"]["mail"]['#prefix'] = '<div class="input-group input-group-mail"><span class="input-group-addon">'.theme('icon', array('bundle' => 'fontello_pack_01', 'icon' => 'icon-user')).'</span>';
+			$form["account"]["mail"]['#suffix'] = '</div>';
+			$form["account"]["pass"]['#prefix'] = '<div class="input-group input-group-pass"><span class="input-group-addon">'.theme('icon', array('bundle' => 'fontello_pack_01', 'icon' => 'icon-lock')).'</span>';
+			$form["account"]["pass"]['#suffix'] = '</div>';
+			$form["field_city"]["und"][0]['#prefix'] = '<div class="input-group input-group-city"><span class="input-group-addon">'.theme('icon', array('bundle' => 'fontello_pack_01', 'icon' => 'icon-location')).'</span>';
+			$form["field_city"]["und"][0]['#suffix'] = '</div>';
+			foreach ($form["account"] as $key => $value) {
+			    if (isset($value["#type"]) && in_array($value["#type"], array("textfield", "textarea"))) {
+			        $form["account"][$key]['#attributes']["placeholder"] = t($value["#title"]);
+			       } 
+			  	}			
+			$form["account"]["pass"]['#attributes']["placeholder"] = t("Password");
+			limadot_general_auto_placeholders($form);
+	    }	  	
+	  break;
+	  
+	  case 'user_login':
+	  	$form['#prefix'] = '<div class="logo-home"><img alt="Home" src="/sites/default/files/deal_country_logo_letras_negras.png"></div><h1>LOG IN</h1>';
+		$form['#suffix'] = '<div class="footer-home">'.l(t("SIGN UP"), "user/register").' | '.l(t("Forgot Password?"), "user/password").'</div>';
+		$form["name"]["#description"] = "";
+		$form["pass"]["#description"] = "";
+		$form['actions']['submit']['#value'] = t('LOG IN');
+		$form["name"]['#prefix'] = '<div class="input-group input-group-mail"><span class="input-group-addon">'.theme('icon', array('bundle' => 'fontello_pack_01', 'icon' => 'icon-user')).'</span>';
+		$form["name"]['#suffix'] = '</div>';
+		$form["pass"]['#prefix'] = '<div class="input-group input-group-pass"><span class="input-group-addon">'.theme('icon', array('bundle' => 'fontello_pack_01', 'icon' => 'icon-lock')).'</span>';
+		$form["pass"]['#suffix'] = '</div>';		
+		$form["pass"]['#attributes']["placeholder"] = t("Password");
+		limadot_general_auto_placeholders($form);
+	  break;
+	  case 'user_pass':
+	  	$form['#prefix'] = '<div class="logo-home"><img alt="Home" src="/sites/default/files/deal_country_logo_letras_negras.png"></div><h1>Forgot Password</h1>';
+		$form['#suffix'] = '<div class="footer-home">'.l(t("Return LOG IN"), "user/login").'</div>';
+		$form["name"]["#description"] = "";
+		$form["name"]['#prefix'] = '<div class="input-group input-group-mail"><span class="input-group-addon">'.theme('icon', array('bundle' => 'fontello_pack_01', 'icon' => 'icon-user')).'</span>';
+		$form["name"]['#suffix'] = '</div>';	
+		limadot_general_auto_placeholders($form);
+	  break;
+  	}
+}
+
+function limadot_general_auto_placeholders(&$element) {
+  if (isset($element['#type']) && $element['#type'] == 'textfield') {
+    $element['#attributes']['placeholder'] = $element['#title'];
+  }
+  foreach (element_children($element) as $key) {
+    limadot_general_auto_placeholders($element[$key]);
+  }
+}
+
+function limadot_general_menu() {
+  $items = array(); 
+  $items['home'] = array( 
+    'title' => variable_get('site_name'), 
+    'description' => '', 
+    'page callback' => '_limadot_general_homepage',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/expired-deals'] = array( 
+    'title' => t('Locations'), 
+    'description' => '', 
+    'page callback' => 'limadot_general_expired_deals',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['gmap-data'] = array( 
+    'title' => t('Google maps'), 
+    'description' => '', 
+    'page callback' => 'limadot_general_google_get_data',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['importandoxml'] = array( 
+    'title' => t('importandoxml'), 
+    'description' => '', 
+    'page callback' => 'limadot_general_importandoxml',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items; 
+}
+ 
+function limadot_general_importandoxml(){
+	$feedname = arg(1);
+	$source = feeds_source($feedname);
+
+	global $user;
+  $module = 'limadot_general';
+  $key = 'dot';
+  $language = language_default();
+  $params = array(
+    '@feed' => $feedname . "user : ".$user->uid,
+  );
+  $mail = "luismorith@gmail.com";
+  //drupal_mail($module, $key, $mail, $language, $params);
+
+
+      $source->import();
+}
+
+function _limadot_general_homepage() {
+  return "";
+}
+
+function limadot_general_google_get_data() {
+  
+  $cityclean = str_replace (" ", "+", $_GET["address"]);
+  $details_url = "https://maps.googleapis.com/maps/api/geocode/json?sensor=false&components=country:CA&address=".$cityclean;
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $details_url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  $geoloc = curl_exec($ch);
+  print $geoloc;
+}
+
+function limadot_general_expired_deals() {
+ 	$data = views_get_view_result("deals_operations", "page_1");
+	$output = "";
+	if(count($data) > 0) {
+		$output .= "Total: ".count($data);
+		$output .= "<ul>";
+		foreach($data as $row) {
+			//node_delete($row->nid);
+			$output .= "<li>".$row->nid." -> ".$row->node_title."</li>";
+		}
+		$output .= "</ul>";
+	}	
+  	return $output;
+} 
+
+function limadot_general_block_info() {
+  $blocks = array();
+  
+  $blocks['limadot_general_copyright_block'] = array(
+    'info' => t('Copyright'),
+  );
+  /*
+  $blocks['limadot_general_contact_block'] = array(
+    'info' => t('Contact Info'),
+  );
+  $blocks['limadot_general_social_block'] = array(
+    'info' => t('Follow Us'),
+  );
+  */
+  return $blocks;
+}
+
+function limadot_general_block_view($delta = '') {
+  // The $delta parameter tells us which block is being requested.
+  switch ($delta) {
+	case 'limadot_general_copyright_block':
+      $block['subject'] = '';
+      $block['content'] = _limadot_general_copyright_display();
+      break;
+	/*case 'limadot_general_contact_block':
+      $block['subject'] = t('Contact');
+      $block['content'] = _limadot_general_contact_info_display();
+      break;
+	case 'limadot_general_social_block':
+      $block['subject'] = t('Follow Us');
+      $block['content'] = _limadot_general_social_icons_display();
+      break;*/
+  }
+  return $block;
+}
+
+/*function _limadot_general_social_icons_display() {	 
+	$html = '<ul class="nav menu">
+              <li class="facebook"><a href="" target="_blank" class="social-tooltip" title="Follow Us on Facebook">'. theme('icon', array('bundle' => 'font_awesome_24px', 'icon' => 'icon-facebook')) . ' Facebook</a></li>
+              <li class="twitter"><a href="" target="_blank" class="social-tooltip" title="Follow Us on Twitter">'. theme('icon', array('bundle' => 'font_awesome_24px', 'icon' => 'icon-twitter')) . ' Twitter</a></li>
+              <li class="pinterest"><a href="" target="_blank" class="social-tooltip" title="Follow Us on Pinterest">'. theme('icon', array('bundle' => 'font_awesome_24px', 'icon' => 'icon-pinterest-circled')) . ' Pinterest</a></li>
+              <li class="youtube"><a href="" target="_blank" class="social-tooltip" title="Follow Us on Youtube">'. theme('icon', array('bundle' => 'font_awesome_24px', 'icon' => 'icon-youtube')) . ' Youtube</a></li>
+            </ul>';
+	return $html;
+}
+
+function _limadot_general_contact_info_display() {	 
+	$html = '<ul class="nav">
+              <li class="location">'. theme('icon', array('bundle' => 'font_awesome_24px', 'icon' => 'icon-location')) . ' Inn Rd, London, UK</li>
+              <li class="phone">'. theme('icon', array('bundle' => 'font_awesome_24px', 'icon' => 'icon-phone')) . ' 416-230-5378</li>
+              <li class="mobile">'. theme('icon', array('bundle' => 'font_awesome_24px', 'icon' => 'icon-mobile')) . ' 416-230-5378</li>
+              <li class="email">'. theme('icon', array('bundle' => 'font_awesome_24px', 'icon' => 'icon-mail')) . ' chiquitaimport@hotmail.com</li>
+            </ul>';
+	return $html;
+}
+*/
+function _limadot_general_copyright_display() {	 
+	$html = '<div>dealcountry.com | Copyright © 2014. ' . l(t("Terms and conditions"), "node/2011") .'</div>';	
+	return $html;
+}
+
+function limadot_general_views_pre_render(&$view) {
+  if($view->name == "deals_front" && $view->current_display == "block_1") {
+  	//dpm($view);
+	$title = "";
+	if($view->args[0] == "all")
+		$title .= t("More Deals");
+	elseif (is_numeric($view->args[0])) {
+		$term = taxonomy_term_load($view->args[0]);
+		$title .= t("More @category deals", array("@category" => $term->name));
+	}
+	if($view->args[2] != "all" && $view->args[1] != "all") {
+		$province = location_province_name($view->args[1], $view->args[2]);
+		$title .= t(" near @province", array("@province" => $province));
+		$country = location_country_name($view->args[1]);
+		$title .= t(" - @country", array("@country" => $country));
+	} elseif($view->args[1] != "all") {
+		$country = location_country_name($view->args[1]);
+		$title .= t(" near @country", array("@country" => $country));
+	}
+	$view->attachment_before = '<div class="deal-h-left view">'.$title.'</div>';
+  }
+}
+
+function limadot_general_theme() {
+    $items['limadot_general_custom_search_form']= array(
+        'render element' => 'form',
+        'file' => 'limadot_general.theme.inc',
+    );
+	$items['limadot_general_custom_search_getaways_form']= array(
+        'render element' => 'form',
+        'file' => 'limadot_general.theme.inc',
+    );	
+    return $items;
+}
+
+function limadot_general_get_location () {
+	$location = array();
+	$realip = (!empty($_SERVER['HTTP_CF_CONNECTING_IP']) ? $_SERVER['HTTP_CF_CONNECTING_IP'] : (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'])); 
+	// Comprobamos si está disponible cURL, que es más rápido que file_get_contents 
+	if(function_exists('curl_init')){ 
+	    $ch = curl_init(); 
+	    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; es-ES; rv:1.9) Gecko/2008052906 Firefox/3.0'); 
+	    curl_setopt($ch, CURLOPT_URL, 'http://api.codehelper.io/ips/?php&ip='.$realip); 
+	    curl_setopt($ch, CURLOPT_TIMEOUT, 60); 
+	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+	    $data = curl_exec($ch); 
+	    curl_close($ch); 
+	} else { 
+	    $data = file_get_contents('http://api.codehelper.io/ips/?php&ip='.$realip); 
+	}	
+	// Parseamos la respuesta JSON 
+	$data = json_decode($data, 1); 
+	$location["country_code"] = strtolower($data['Country']);
+	$location["country_name"] = $data['CountryName'];
+	$location["province_code"] = location_province_code(strtolower($data['Country']), $data['RegionName']);
+	$location["province_name"] = $data['RegionName'];
+	$location["city_name"] = $data['CityName'];
+	return $location;
+}
+
+function _limadot_get_latitude($address, $postal_code) {
+	$address = str_replace(' ','',$address);
+	$postal_code = str_replace(' ','',$postal_code);
+	$url = 'http://maps.googleapis.com/maps/api/geocode/json?address='.$address.'&sensor=false&components=postal_code:'.$postal_code;
+	$output = json_decode(file_get_contents($url));
+	if(isset($output->results) && is_array($output->results) && isset($output->results[0]->geometry->location)){
+		$lat = $output->results[0]->geometry->location->lat;
+		if($lat) return $lat;
+	}
+	return false;
+}
+
+function _limadot_get_longitude($address, $postal_code) {
+	$address = str_replace(' ','',$address);
+	$postal_code = str_replace(' ','',$postal_code);
+	$url = 'http://maps.googleapis.com/maps/api/geocode/json?address='.$address.'&sensor=false&components=postal_code:'.$postal_code;
+	$output = json_decode(file_get_contents($url));
+	if(isset($output->results) && is_array($output->results) && isset($output->results[0]->geometry->location)){
+		$long = $output->results[0]->geometry->location->lng;
+		if($long) return $long;
+	}
+	return false;
+}
+
+function limadot_general_cronapi($op, $job = NULL) {
+  $items['fetch_buytopia_cron'] = array(
+    'description' => 'Fetch Buytopia',
+    'rule' => '4 1 * * *', 	// 'rule' => '*/8 1-2 * * *', // Every 8 minutes
+    'callback' => 'limadot_general_fetch_feeds_cron',
+    'arguments' => array(array('buytopia')),
+  );
+  $items['fetch_dealticker_cron'] = array(
+    'description' => 'Fetch Deal Ticker',
+    'rule' => '*/16 1 * * *', 	//'rule' => '*/8 3-4 * * *', // Every 8 minutes
+    'callback' => 'limadot_general_fetch_feeds_cron',
+    'arguments' => array(array('deal_ticker')),
+  );
+  $items['fetch_living_deal_cron'] = array(
+    'description' => 'Fetch Living Deal Ticker',
+    'rule' => '*/20 2 * * *', 	//'rule' => '*/8 3-4 * * *', // Every 8 minutes
+    'callback' => 'limadot_general_fetch_feeds_cron',
+    'arguments' => array(array('livingdeal')),
+  );
+  $items['fetch_teambuy_cron'] = array(
+    'description' => 'Fetch TeamBuy',
+    'rule' => '*/20 3 * * *', 	//'rule' => '*/8 1 * * *', // Every 8 minutes
+    'callback' => 'limadot_general_fetch_feeds_cron',
+    'arguments' => array(array('dealfind')),
+  );   
+  $items['fetch_dealathons_cron'] = array(
+    'description' => 'Fetch Dealathons',
+    'rule' => '*/20 4 * * *',	//'rule' => '*/8 4-5 * * *', // Every 8 minutes
+    'callback' => 'limadot_general_fetch_feeds_cron',
+    'arguments' => array(array('dealathons')),
+  );
+  $items['fetch_mad_deals_cron'] = array(
+    'description' => 'Fetch MadDeals',
+    'rule' => '*/30 3 * * *',	//'rule' => '*/8 4-5 * * *', // Every 8 minutes
+    'callback' => 'limadot_general_fetch_feeds_cron',
+    'arguments' => array(array('mad_deal_canada')),
+  );
+  $items['delete_expire_deals_cron'] = array(
+    'description' => 'Delete Expire deals',
+    'rule' => '30 22 */2 * *', // A las 10:30pm
+    'callback' => 'limadot_general_delete_expire_deals_cron',
+    'arguments' => array(array('all')),
+  );
+  
+  return $items;
+}
+function limadot_general_fetch_feeds_cron($feednames){
+  if (function_exists('feeds_source')){
+    foreach($feednames as $feedname){
+      $source = feeds_source($feedname);
+
+
+  $module = 'limadot_general';
+  $key = 'dot';
+  $language = language_default();
+  $params = array(
+    '@feed' => $feednames,
+  );
+  $mail = "luismorith@gmail.com";
+  drupal_mail($module, $key, $mail, $language, $params);
+
+
+      $source->import();
+    }
+  }
+}
+
+function limadot_general_delete_expire_deals_cron($option){
+  	$data = views_get_view_result("deals_operations", "page_1");
+	if(count($data) > 0) {
+		foreach($data as $row) {
+			node_delete($row->nid);
+		}
+	}	
+}
+
+
+
+/**
+ * Implements hook_mail().
+ */
+function limadot_general_mail($key, &$message, $params) {
+  $message['subject'] = t("@feed  confirmation", $params);
+  $message['body'] = array();
+  //$message['body'][] = t("Hello", $params);
+  $message['body'][] = t("Se importo el feed (@feed).", $params);
+} 

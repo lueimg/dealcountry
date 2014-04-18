@@ -1,0 +1,8 @@
+filename = "dealcountry.com-2014-03-18T00-16-41"
+description = ""
+datestamp = "1395116208"
+generator = "Backup and Migrate (http://drupal.org/project/backup_migrate)"
+generatorversion = "7.x-2.x"
+sites[0][version] = "7.24"
+sites[0][name] = "dealcountry.com"
+sites[0][url] = "http://www.dealcountry.com/"

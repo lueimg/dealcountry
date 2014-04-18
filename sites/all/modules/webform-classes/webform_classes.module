@@ -1,0 +1,134 @@
+<?php
+/**
+ * @file
+ * The webform_classes module.
+ */
+
+/**
+ * Standard hook_node_load.
+ */
+function webform_classes_node_load($nodes, $types) {
+
+  foreach ($nodes as $key => $node) {
+    $results = db_select('webform_component', 'wc')
+    ->fields('wc', array('class', 'cid'))
+    ->condition('nid', (int) $node->nid, '=')
+    ->execute();
+
+    $classlist = array();
+    while ($record = $results->fetchAssoc()) {
+      $classlist[$record['cid']] = $record['class'];
+    }
+    $node->webform_classes = $classlist;
+  }
+}
+
+/**
+ * Standard use of hook_form_alter.
+ */
+function webform_classes_form_alter(&$form, &$form_state, $form_id) {
+
+  if (substr($form['#id'], 0, 20) == 'webform-client-form-') {
+    webform_classes_add_classes($form, substr($form['#id'], 20), $form['#node']->webform_classes);
+  }
+}
+
+/**
+ * Standard use of hook_form_alter_webform_component_edit_form_alter.
+ */
+function webform_classes_form_webform_component_edit_form_alter(&$form, $component) {
+  $nid = $form['nid']['#value'];
+  $cid = $form['cid']['#value'];
+  if ($cid == NULL) {
+    $cid = 0;
+  }
+  $class = db_select('webform_component', 'wc')
+    ->fields('wc', array('class'))
+    ->condition('nid', (int) $nid, '=')
+    ->condition('cid', (int) $cid, '=')
+    ->execute()
+    ->fetchAssoc();
+  $form['classes'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Classes'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#weight' => 5,
+    'classes' => array(
+      '#type' => 'textfield',
+      '#title' => t('Class'),
+      '#default_value' => $class,
+      '#description' => t('Specific class or classes (seperated by space) for this element of the form.'),
+      '#size' => 26,
+      '#maxlength' => 255,
+      '#weight' => 1,
+    ),
+  );
+}
+
+/**
+ * Called standard component update hook.
+ */
+function webform_classes_webform_component_update($component) {
+
+  $default_class = isset($component['class']) ? $component['class'] : '';
+
+  $nid = $component['nid'];
+  $cid = $component['cid'];
+  $class = (isset($component['classes']['classes'])) ? $component['classes']['classes'] : $default_class;
+  $result = db_update('webform_component')
+    ->fields(array(
+    'class'=> $class,
+     ))
+     ->condition('nid', (int) $nid, '=')
+     ->condition('cid', (int) $cid, '=')
+     ->execute();
+}
+
+/**
+ * Respond to a Webform component being inserted into the database.
+ */
+function webform_classes_webform_component_insert($component) {
+  webform_classes_webform_component_update($component);
+}
+
+/**
+ * This is what alters the rendering.
+ */
+function webform_classes_add_classes(&$form_element, $nid, $classes) {
+
+  webform_classes_add_a_class($form_element, $nid, $classes);
+  $components = element_children($form_element);
+  foreach ($components as $key => $component_id) {
+    $child_element = &$form_element[$component_id];
+    webform_classes_add_classes($child_element, $nid, $classes);
+  }
+}
+
+/**
+ * Called by webform_classes_add_classes within the foreach loop.
+ */
+function webform_classes_add_a_class(&$form_element, $nid, $classes) {
+
+  $cid = 0;
+  if (isset($form_element['#webform_component']['cid'])) {
+    $cid = $form_element['#webform_component']['cid'];
+  }
+
+  if (isset($form_element['#attributes']['class'])) {
+    $current_class = $form_element['#attributes']['class'];
+  }
+  else {
+    $current_class = NULL;
+  }
+
+  if ($cid != 0) {
+    if ($current_class != NULL) {
+      $form_element['#attributes']['class'] = array_merge($form_element['#attributes']['class'], array($classes[$cid]));
+    }
+    else {
+      $form_element['#attributes']['class'] = array($classes[$cid]);
+    }
+  }
+
+}
