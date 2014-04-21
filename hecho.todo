@@ -1,0 +1,5 @@
+Cambios a realizar en produccion :
+  ☐ quitar colorbox en http://dealcountry.dev/admin/structure/ds/fields/manage_custom/gifcard_link
+  ☐ Subir tablas giftcard , detail , order , transaction
+  ☐ Modulo giftcard
+  ☐ agregar path giftcard al contexto http://dealcountry.dev/admin/structure/context/list/deals-list/edit

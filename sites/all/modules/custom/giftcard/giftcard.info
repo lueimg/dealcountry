@@ -1,0 +1,6 @@
+name = Gift card modules
+description = This module contains small customizations for gift card.
+version = 7.x-1.0
+core = 7.x
+package = Extensions from LimaDot
+files[] = giftcard.module
