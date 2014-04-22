@@ -24,8 +24,18 @@ function giftcard_menu() {
     // 'page callback' => 'giftcard_list',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('giftcard_list_form'),
-    'access callback' => array("administer giftcard"),
+    'access arguments' => array("administer giftcard"),
     'type' =>  MENU_NORMAL_ITEM,
+  );
+
+  $items['admin/giftcard/list'] = array( 
+    'title' => t('Gift Card'), 
+    'description' => '', 
+    // 'page callback' => 'giftcard_list',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('giftcard_list_form'),
+    'access arguments' => array("administer giftcard"),
+    'type' =>  MENU_DEFAULT_LOCAL_TASK,
   );
 
   $items['admin/giftcard/add'] = array( 
@@ -38,13 +48,51 @@ function giftcard_menu() {
     // 'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
+$items['admin/giftcard/orders'] = array( 
+    'title' => t('Purchases'), 
+    'description' => '', 
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('giftcard_list_orders_form'),
+    'access arguments' => array("administer giftcard"),
+    'type' => MENU_LOCAL_TASK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  
+  $items['admin/giftcard/orders/view'] = array( 
+    'title' => t('Purchases'), 
+    'description' => '', 
+    'page callback' => 'giftcard_list_orders_view',
+    'access arguments' => array("administer giftcard"),
+    'type' => MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['admin/giftcard/orders/edit'] = array( 
+    'title' => t('Purchases'), 
+    'description' => '', 
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array("giftcard_list_orders_edit_form"),
+    'access arguments' => array("administer giftcard"),
+    'type' => MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['admin/giftcard/orders/cancel'] = array( 
+    'title' => t('Purchases'), 
+    'description' => '', 
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array("giftcard_list_orders_cancel_form"),
+    'access arguments' => array("administer giftcard"),
+    'type' => MENU_CALLBACK,
+  );
+
   $items['login'] = array( 
     'title' => t('Login / Register'), 
     'description' => '', 
     'page callback' => 'giftcard_login',
     // 'page arguments' => array('giftcard_add_form'),
     'access arguments' => array('access content'),
-    'type' =>  MENU_NORMAL_ITEM,
+    'type' =>  MENU_CALLBACK,
     // 'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
@@ -54,9 +102,50 @@ $items['giftcard/order'] = array(
      'page callback' => 'drupal_get_form',
     'page arguments' => array('giftcard_order_form'),
     'access arguments' => array('access content'),
-    'type' =>  MENU_NORMAL_ITEM,
+    'type' =>  MENU_CALLBACK,
     // 'type' => MENU_DEFAULT_LOCAL_TASK,
   );
+
+
+$items['myaccount'] = array( 
+    'title' => t('My Account'), 
+    'description' => '', 
+    'page callback' => 'giftcard_page_myaccount',
+    'access arguments' => array('access content'),
+    'type' =>  MENU_CALLBACK,
+  );
+
+$items['myaccount/purchase'] = array( 
+    'title' => t('My Purchases'), 
+    'description' => '', 
+     'page callback' => 'giftcard_page_purchase',
+    // 'page arguments' => array('giftcard_order_form'),
+    'access arguments' => array('access content'),
+    'type' =>  MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+
+$items['myaccount/addfunds'] = array( 
+    'title' => t('Add Funds to Gift Card'), 
+    'description' => '', 
+     'page callback' => 'giftcard_page_add_funds',
+    // 'page arguments' => array('giftcard_order_form'),
+    'access arguments' => array('access content'),
+    'type' =>  MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+$items['myaccount/addfunds/payment'] = array( 
+    'title' => t('Add Funds to Gift Card'), 
+    'description' => '', 
+     'page callback' => 'giftcard_page_add_funds_payment',
+    // 'page arguments' => array('giftcard_order_form'),
+    'access arguments' => array('access content'),
+    'type' =>  MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
 
   return $items; 
 }
@@ -177,7 +266,7 @@ $nid = db_insert('giftcard') // Table name no longer needs {}
             'service_fee' => $values['servicefee'],
             'status' => $status,
             'created' => date('Y-m-d H:i:s'),
-            'user_id' => $user->uid,
+            'user' => $user->uid,
           ))
           ->execute();
 
@@ -198,7 +287,18 @@ $nid = db_insert('giftcard') // Table name no longer needs {}
     return $links;
  }
 
-function giftcard_list(){
+
+ function _giftcard_orders_generate_options($id){
+    $links = l(t('View'), "admin/giftcard/orders/view/$id").  '&nbsp;&nbsp;'.
+             l(t('Edit'), "admin/giftcard/orders/edit/$id").  '&nbsp;&nbsp;'.
+            l(t('Cancel'),"admin/giftcard/orders/cancel/$id").  '&nbsp;&nbsp;'
+            ;
+    return $links;
+ }
+
+
+
+// function giftcard_list(){
 
 // $header = array(
 //              array('data' => t('ID'), 'field' => 'id', 'sort' => 'asc'), // sort
@@ -235,16 +335,17 @@ function giftcard_list(){
 
 //     return $output;
 
-}
+// }
 
 
 
 function giftcard_list_form($node, &$form_state){
 $header = array(
-             array('data' => t('ID'), 'field' => 'id', 'sort' => 'asc'), // sort
+             array('data' => t('ID'), 'field' => 'id', 'sort' => 'desc'), // sort
              array('data' => t('Code'), 'field' => 'code'),
              array('data' => t('Original value'), 'field' => 'original_value'),
              array('data' => t('Balance value'), 'field' => 'balance_value'),
+             array('data' => t('BV without Pendents')),
              array('data' => t('Client'), 'field' => 'client'),
              array('data' => t('Start Date'), 'field' => 'start_date'),
              array('data' => t('End Date'), 'field' => 'end_date'),
@@ -315,7 +416,8 @@ $form['filter']['reset'] = array(
 $query = db_select('giftcard', 'g');
 
     $query->fields('g', array('id', 'code', 'original_value','balance_value','client','start_date','end_date','service_fee','status',"created"));
-
+    $query->addField("u" , "name");
+    $query->leftjoin("users" , "u" , "u.uid = g.client");
     $table_sort = $query->extend('TableSort') // Add table sort extender.
                         ->orderByHeader($header); // Add order by headers.
     
@@ -339,7 +441,29 @@ $query = db_select('giftcard', 'g');
     $rows = array();
     foreach($result as $res){
 
-      $rows[$res->id] = array($res->id, $res->code, $res->original_value,$res->balance_value ,$res->client,$res->start_date,$res->end_date,$res->service_fee,$res->status , $res->created , _giftcard_generate_options($res->id));
+      switch ($res->status) {
+        case '0':
+          $status_label = "Inactive";
+          break;case '1':
+          $status_label = "Active";
+          break;case '2':
+          $status_label = "Expirate";
+          break;
+        
+       
+      }
+      $rows[$res->id] = array($res->id, 
+                              $res->code, 
+                            $res->original_value,
+                            giftcard_balance_value_enable($res->id),
+                            $res->balance_value ,
+                            $res->name,
+                            $res->start_date,
+                            $res->end_date,
+                            $res->service_fee,
+                            $status_label , 
+                            $res->created , 
+                            _giftcard_generate_options($res->id));
 
     }
 
@@ -572,18 +696,26 @@ function giftcard_order_form_submit($form, &$form_state) {
   // dsm($form_state);
 global $user;
 $values  = $form_state["values"];
-
+$rs = db_query("select * from giftcard g where g.state = 1 and g.status = 1 and g.end_date >= NOW() AND g.code = '".$values["giftcard"]."'");
+		
+$giftcard = $rs->fetchObject(); 
 // VALIDAR PEDIDO
 
 // AGREGAR GIFT CARD AL USUARIO
-	$add = giftcard_register_to_user( $values["giftcard"] , $user->uid );
+  $add = giftcard_register_to_user( $values["giftcard"] , $user->uid );
 // DISMINUIR GIFTCARD
-  giftcard_discrease_balance_value( $values["giftcard"] , $values["nid"] );
+  $charge = giftcard_discrease_balance_value( $values["giftcard"] , $values["nid"] );
 // REGISTRAR PEDIDO Y MOSTRARLO EN LA LISTA
-
-
+  $idorder = giftcard_register_order($values);
 // REGISTRAR DETALLE A DE USO DE GIFTCARD
+  giftcard_register_detail( $giftcard->id , 
+  							$type = 1 , 
+  							$description = 'Register Order' , 
+  							$charge , 
+  							$idorder  = $idorder );
 
+  drupal_set_message(t("Your Order have been registered , Please visit your orders in your account"), 'status', FALSE);
+  drupal_goto("node/".$values["nid"]);
 
 }
 
@@ -616,7 +748,7 @@ function giftcard_validate_code( $code , $uid , $nid ){
 		}
 
 		if ($price > $balance_value) {
-			return array("validate"=>FALSE , "message"=>"Your Gift card doesn't have  enough money, please Add more funds to your gift card. thanks", "alert"=>$alert );
+			return array("validate"=>FALSE , "message"=>"Your Gift card doesn't have  enough money, please Add more funds to your gift card. thanks. \n Your balance value is ".$balance_value, "alert"=>$alert );
 
 
 		}else{
@@ -686,28 +818,41 @@ function giftcard_register_order($values){
 	$price = $node->field_deal_price_value['und'][0]['value'];
 
 	global $user;
-
+	// dsm($node);
+	// dsm($giftcard);
 	//registramosel giftcard al usuario
-	$nid = db_insert('order') // Table name no longer needs {}
+	$nid = db_insert('orders') // Table name no longer needs {}
           ->fields(array(
-            'idoffer' => $offer->nid,
-            'titulo' => $offer->title,
+            'idoffer' => $node->nid,
+            'title' => $node->title,
             'idgiftcard' => $giftcard->id,
             'client' => $user->uid,
             'charge' => $price,
+            'shipping' => 0,
+            'taxes' => 0,
+            'comment' => "",
             'final_charge' => $price,
             'status' => 1,
-            'sh_name' => $values['servicefee'], // FALTAAAAAAAAA
-            'status' => $status,
+            'sh_name' => $values['name'], 
+            'sh_last_name' => $values['lastname'], 
+            'sh_email' => $values['mail'], 
+            'sh_telephone' => $values['telephone'], 
+            'sh_address' => $values['address'], 
+            'sh_suite' => $values['suite'], 
+            'sh_city' => $values['city'], 
+            'sh_postalcode' => $values['postalcode'], 
+            'order_details' => $values['orderdetail'], 
             'created' => date('Y-m-d H:i:s'),
-            'user_id' => $user->uid,
+            'user' => $user->uid,
+            'state' => 1,
           ))
           ->execute();
-
+          // dsm($nid);
+       return $nid;
 }
 
 
-function giftcard_register_to_user( $code , $user ){
+function giftcard_register_to_user( $code , $uid ){
 
 	// VALIDAR QUE EXISTA
 	 $rs = db_query("select * from giftcard g where g.state = 1 and g.status = 1 and g.end_date >= NOW() AND g.code = '".$code."'");
@@ -733,7 +878,7 @@ function giftcard_register_to_user( $code , $user ){
 
 
 		// ACTUALIZAR GIFTCARD
-		db_query("update giftcard set client= $user  where code = '$code'");
+		db_query("update giftcard set client= $uid  where code = '$code'");
 		return array("response"=>TRUE , "message"=>"ok");
 
 }
@@ -750,9 +895,9 @@ function giftcard_discrease_balance_value( $code , $nid ){
 		$price = $node->field_deal_price_value['und'][0]['value'];
 		$balance_value = $giftcard->balance_value;
 
-	db_query('update giftcard set balance_value = balance_value - '.$price . ' where code = "'.$code.'"');
+	db_query("update giftcard set balance_value = balance_value - $price where code ='$code'");
 
-	//REGISTRAR DETALLE DE GIFTCARD
+	return $price;
 
 
 
@@ -771,7 +916,845 @@ function giftcard_order_remove(){}
 
 function giftcard_register_detail($idgiftcard , $type , $description = '' , $charge , $idorder  = 0 , $idtransaction = 0  ){
 
+		global $user;
+
+	//registramosel giftcard al usuario
+	$nid = db_insert('giftcard_detail') // Table name no longer needs {}
+          ->fields(array(
+            'idgiftcard' => $idgiftcard,
+            'type' => $type,
+            'concept' => $description,
+            'charge' => $charge,
+            'idorder' => $idorder,
+            'idtransaction' => $idtransaction,
+            'state' => 1,
+            'created' => date('Y-m-d H:i:s'),
+            'user' => $user->uid,
+          ))
+          ->execute();
+
+
 }
+
+
+
+function giftcard_page_myaccount(){
+
+global $user;
+// dsm($user);
+//LISTADO DE GIFTCARD
+
+$header = array(
+             array('data' => t('GiftCard')), // sort
+             array('data' => t('Code'), 'field' => 'code'),
+             array('data' => t('Activation Date'), 'field' => 'start_date'),
+             array('data' => t('Balance on GiftCard'), 'field' => 'balance_value'),
+             
+           );
+
+//query
+$query = db_select('giftcard', 'g');
+
+    $query->fields('g', array('id', 'code', 'original_value','balance_value','client','start_date','end_date','service_fee','status',"created"))
+    ->condition("client" , $user->uid , "=");
+    $table_sort = $query->extend('TableSort') // Add table sort extender.
+                        ->orderByHeader($header); // Add order by headers.
+    $pager = $table_sort->extend('PagerDefault')
+                        ->limit(15); // 5 rows per page.
+    $result = $pager->execute();
+
+    $rows = array();
+    foreach($result as $res){
+
+      $rows[] = array("[logo]", $res->code , $res->start_date , $res->balance_value );
+
+    }
+    $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'sort-table')));
+    $output .= theme('pager');
+    $table = $output ;
+
+
+    return $table;
+
+}
+
+function giftcard_page_purchase(){
+	
+global $user; 
+$query = db_select('orders', 'o')
+
+    ->fields('o', array('id', 'idoffer', 'idgiftcard','status','created'));
+    $query->addField("g","code","code");
+    $query->leftjoin("giftcard" , "g" , "g.id = o.idgiftcard");
+    $query->condition("o.client" , $user->uid , "=");
+    $rs = $query->execute()->fetchAll();
+     // dsm($rs);
+    $offers = "";
+    foreach ($rs as  $row) {
+    	// dsm($value);
+      switch ($row->status) {
+        case '1':
+          $status_label = "Pendent";
+          break;
+case '2':
+          $status_label = "Delivered";
+          break;
+          case '3':
+          $status_label = "Canceled";
+          break;
+
+}
+    $args = array($row->idoffer);
+		$view = views_get_view('selected_deal');
+
+		$offers .=  "<div class=\"purchase\">";
+		$offers .=  $view->preview('default', $args);
+		$offers .=  "<div class=\"details\">"
+					."<span class=\"wrapper\"> <span class=\"label\">Purchase Data</span><span class=\"data\">".$row->created ."</span> </span>"
+					."<span class=\"wrapper\"> <span class=\"label\">Payed with Gift card</span><span class=\"data\">".$row->code."</span> </span>"
+					."<span class=\"wrapper\"> <span class=\"label\">Status</span><span class=\"data\">".$status_label."</span> </span>" . 
+					"</div>";
+		$offers .=  "</div>";
+
+    }
+
+
+	return $offers;
+}
+
+
+function giftcard_page_add_funds(){
+	
+//GENERAR ORDEN DE PAGO
+	
+
+$form = drupal_get_form("giftcard_page_add_funds_form");
+// $form2 = drupal_get_form("giftcard_pay_user_settings_form");
+$html = drupal_render($form);
+
+
+return $html;
+
+
+}
+
+
+function giftcard_page_add_funds_form($form_state){
+	
+$form['code'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Gift card code:'),
+          '#required' => TRUE,
+          '#default_value'=>""
+        );
+$form['amount'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Amount:'),
+          '#required' => TRUE,
+          '#default_value'=>"5.00"
+        );
+
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Add Funds',
+  );
+
+  return $form;
+}
+
+function giftcard_page_add_funds_form_validate($form, &$form_state) {
+  // $year_of_birth = $form_state['values']['year_of_birth'];
+  // if ($year_of_birth && ($year_of_birth < 1900 || $year_of_birth > 2000)) {
+  //   form_set_error('year_of_birth', 'Enter a year between 1900 and 2000.');
+  // }
+}
+
+function giftcard_page_add_funds_form_submit($form, &$form_state) {
+   
+drupal_goto("myaccount/addfunds/payment");
+
+}
+
+
+
+
+function giftcard_page_add_funds_payment(){
+
+require_once 'anet_php_sdk/AuthorizeNet.php'; // Include the SDK you downloaded in Step 2
+$api_login_id = '3LunE32TE4';
+$transaction_key = '977n9uYxMk866Uev';
+$amount = "15.99";
+$fp_timestamp = time();
+$fp_sequence = "123" . time(); // Enter an invoice or other unique number.
+$fingerprint = AuthorizeNetSIM_Form::getFingerprint($api_login_id,
+  $transaction_key, $amount, $fp_sequence, $fp_timestamp);
+
+
+$html= <<<EOD
+
+<form method='post' action="https://secure.authorize.net/gateway/transact.dll">
+<input type='hidden' name="x_login" value="{$api_login_id}" />
+<input type='hidden' name="x_fp_hash" value="{$fingerprint}" />
+<input type='hidden' name="x_amount" value="{$amount}" />
+<input type='hidden' name="x_fp_timestamp" value="{$fp_timestamp}" />
+<input type='hidden' name="x_fp_sequence" value="{$fp_sequence}" />
+<input type='hidden' name="x_version" value="3.1">
+<input type='hidden' name="x_show_form" value="payment_form">
+<input type='hidden' name="x_test_request" value="false" />
+<input type='hidden' name="x_method" value="cc">
+<input type='submit' value="Click here for the secure payment form">
+</form>
+EOD;
+return $html;
+}
+
+
+/* ADMINISTRACION DE ORDENES DE COMPRA */
+
+
+
+
+function giftcard_list_orders_form($node, &$form_state){
+$header = array(
+             array('data' => t('ID'), 'field' => 'id', 'sort' => 'desc'), // sort
+             array('data' => t('Offer'), 'field' => 'title'),
+             array('data' => t('Code'), 'field' => 'code'),
+             array('data' => t('User'), 'field' => 'name'),
+             array('data' => t('Balance value'), 'field' => 'balance_value'),
+             array('data' => t('Charge'), 'field' => 'charge'),
+             array('data' => t('Shipping'), 'field' => 'shipping'),
+             array('data' => t('Taxes'), 'field' => 'taxes'),
+             array('data' => t('Final Charge'), 'field' => 'final_charge'),
+             array('data' => t('Order Details'), 'field' => 'order_details'),
+             array('data' => t('Created'), 'field' => 'created'),
+             array('data' => t('Delivered'), 'field' => 'delivered_date'),
+             array('data' => t('Status'), 'field' => 'status'),
+             array('data' => t('Actions'), ),
+           );
+
+$form = array();
+ 
+
+$form['filter'] = array(
+  '#type' => 'fieldset',
+  '#collapsible' => TRUE,
+  '#collapsed' => FALSE,
+  '#title' => t('Filter option')
+);
+$form['filter']['status'] = array(
+  '#type' => 'select',
+  '#title' => t('Status'),
+  '#options' => array(
+          "all" => t('all'),
+          1 => t('Pendent'),
+          2 => t('Delivered'),
+          3 => t('Canceled'),
+       ),
+  // '#default_value'=>(!empty($_SESSION["giftcard"]["CODE"]))?$_SESSION["giftcard"]["CODE"]:"",
+);
+
+
+$form['filter']['submit'] = array(
+  '#type' => 'submit',
+  '#value' => t('Filter'),
+);
+
+
+
+//query
+// select o.id , o.idoffer , o.title , 
+// g.code , u.name , g.balance_value , o.charge , o.order_details , o.status   , o.created
+// from orders o
+// left join users u on u.uid = o.client
+// left join giftcard g on g.id = o.idgiftcard
+// ;
+
+$query = db_select('orders', 'o');
+
+    $query->fields('o', array('id', 'idoffer', 'title','charge','shipping' , 'taxes' , 'final_charge', 'delivered_date', 'order_details','status','created'));
+    $query->fields('g', array('code', 'balance_value'));
+    $query->fields('u', array('name'));
+    $query->addField("g","id","idgiftcard");
+    $query->leftjoin("users" , "u" , "u.uid = o.client");
+    $query->leftjoin("giftcard" , "g" , "g.id = o.idgiftcard");
+    // $query->orderBy("o.created","DESC");
+
+    $table_sort = $query->extend('TableSort') // Add table sort extender.
+                        ->orderByHeader($header); // Add order by headers.
+    
+    $pager = $table_sort->extend('PagerDefault')
+                        ->limit(15); // 5 rows per page.
+    // dsm($form_state);
+    if (!empty($_SESSION["giftcard"]["orders"]["status"]) and $_SESSION["giftcard"]["orders"]["status"] != "all") {
+          $query->condition('o.status',  $_SESSION["giftcard"]["orders"]["status"] , '=');
+    }         
+             
+
+
+    $result = $pager->execute();
+
+            // array('data' => t('ID'), 'field' => 'id', 'sort' => 'asc'), // sort
+            //  array('data' => t('Offer'), 'field' => 'title'),
+            //  array('data' => t('Code'), 'field' => 'code'),
+            //  array('data' => t('User'), 'field' => 'name'),
+            //  array('data' => t('Balance value'), 'field' => 'balance_value'),
+            //  array('data' => t('Charge'), 'field' => 'charge'),
+            //  array('data' => t('Order Details'), 'field' => 'order_details'),
+            //  array('data' => t('Created'), 'field' => 'created'),
+            //  array('data' => t('Status'), 'field' => 'status'),
+            //  array('data' => t('Actions'), ),
+
+    $rows = array();
+    foreach($result as $res){
+      switch ($res->status) {
+        case '1':
+          $status_label = "Pendent";
+          break;
+          case '2':
+          $status_label = "Delivered";
+          break;
+          case '3':
+          $status_label = "Canceled";
+          break;
+}
+      $rows[$res->id] = array($res->id, 
+                              $res->title,
+                              $res->code, 
+                              $res->name ,
+                              // $res->balance_value,
+                              giftcard_balance_value_enable($res->idgiftcard),
+                              $res->charge,
+                              $res->shipping,
+                              $res->taxes,
+                              $res->final_charge,
+                              $res->order_details,
+                              $res->created , 
+                              $res->delivered_date , 
+                              $status_label  , 
+                              _giftcard_orders_generate_options($res->id));
+
+    }
+
+// global $pager_page_array, $pager_total, $pager_total_items, $pager_limits;
+// dsm($pager_total_items);
+// dsm($pager_limits);
+// $form['tablecount'] = array('#markup' => $result->rowCount());
+
+
+// $form['table'] = array(
+//   '#type' => 'tableselect',
+//   '#header' => $header,
+//   '#options' => $rows,
+//   '#empty' => t('Table has no row!')
+// );
+
+$form['table'] = array(
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => $rows,
+      '#empty' => t('Empty Rows')
+      );
+
+$form['pager'] = array('#markup' => theme('pager'));
+
+return $form;
+}
+
+
+
+function giftcard_list_orders_form_submit($form, &$form_state) {
+
+   $_SESSION["giftcard"]["orders"]["status"] = $form_state['values']['status'];   
+   $form_state['rebuild'] = TRUE;
+
+
+}
+
+
+function giftcard_list_orders_view(){
+
+  $idorder = arg(4);
+  //DATOS DEL PEDIDO
+  $rs = db_query(" select o.id , o.idoffer , o.title , o.taxes , o.shipping , o.final_charge , o.delivered_date,
+g.code , u.name , g.balance_value , o.charge , o.order_details , o.status   , o.created , o.comment
+, o.sh_name , o.sh_last_name , o.sh_email , o.sh_telephone , o.sh_address , o.sh_suite , 
+o.sh_city , o.sh_postalcode , g.id as idgiftcard
+from orders o
+left join users u on u.uid = o.client
+left join giftcard g on g.id = o.idgiftcard where o.id = $idorder");
+
+
+  $order = $rs->fetchObject();
+  $page = "";
+  $balance_contable = giftcard_balance_value_enable($order->idgiftcard);
+  if($order->status == 1 )
+    $label_status = "Pendent";
+  elseif($order->status == 2)
+    $label_status = "Delivered";
+  elseif($order->status == 3)
+    $label_status = "Canceled";
+
+
+
+
+  $page = <<<EOD
+  <fieldse class="datainformation">  
+    <h3> Offer information:</h3>
+    <div class="row">
+        <span class="label"><b>Offer:</b></span>
+        <span class="text">{$order->title}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Cost:</b></span>
+        <span class="text">$ {$order->charge}</span>
+    </div>
+     <div class="row">
+        <span class="label"><b>Shipping:</b></span>
+        <span class="text">$ {$order->shipping}</span>
+    </div>
+     <div class="row">
+        <span class="label"><b>Taxes:</b></span>
+        <span class="text">$ {$order->taxes}</span>
+    </div>
+     <div class="row">
+        <span class="label"><b>Final charge:</b></span>
+        <span class="text">$ {$order->final_charge}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Gift card:</b></span>
+        <span class="text">{$order->code}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Gift card balance:</b></span>
+        <span class="text">$ {$balance_contable}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Order Details:</b></span>
+        <span class="text"> {$order->order_details}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Order Status:</b></span>
+        <span class="text"> {$label_status}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Delivered date:</b></span>
+        <span class="text"> {$order->delivered_date}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Comment:</b></span>
+        <span class="text"> {$order->comment}</span>
+    </div>
+  <h3>Shipping Information:</h3>
+  <div class="row">
+        <span class="label"><b>First Name:</b></span>
+        <span class="text">{$order->sh_name}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Last Name:</b></span>
+        <span class="text">{$order->sh_last_name}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Email:</b></span>
+        <span class="text">{$order->sh_email}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Telephone:</b></span>
+        <span class="text">{$order->sh_telephone}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Address:</b></span>
+        <span class="text">{$order->sh_address}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Suite:</b></span>
+        <span class="text">{$order->sh_suite}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>City:</b></span>
+        <span class="text">{$order->sh_city}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Postal Code:</b></span>
+        <span class="text">{$order->sh_postalcode}</span>
+    </div>
+   
+    
+
+
+
+  </fieldse>
+
+
+EOD;
+
+
+  return $page;
+}
+
+
+
+/* Saldo disponible de un gifcard
+  es la suma del balance_value del gift card + el monto de los pedidos aun pendientes
+  */
+function giftcard_balance_value_enable($idgiftcard){
+
+  $rs = db_query('SELECT balance_value FROM giftcard where id = '.$idgiftcard);
+  $obj = $rs->fetchObject();
+
+  $rs = db_query('SELECT sum(charge) as total FROM orders where idgiftcard = '.$idgiftcard . ' and status = 1 ');
+  $obj2 = $rs->fetchObject();
+
+  $total = $obj->balance_value + $obj2->total;
+
+  return $total;
+
+}
+
+
+
+function giftcard_list_orders_edit(){
+
+$form  = "giftcard_list_orders_edit_form";
+$page = render(drupal_get_form($form));
+
+return $page;
+
+}
+
+
+
+
+function giftcard_list_orders_edit_form($node, &$form_state){
+
+
+ $idorder = arg(4);
+  //DATOS DEL PEDIDO
+  $rs = db_query(" select o.id , o.idoffer , o.title , 
+g.code , u.name , g.balance_value , o.charge , o.order_details , o.status   , o.created
+, o.sh_name , o.sh_last_name , o.sh_email , o.sh_telephone , o.sh_address , o.sh_suite , 
+o.sh_city , o.sh_postalcode , g.id as idgiftcard
+from orders o
+left join users u on u.uid = o.client
+left join giftcard g on g.id = o.idgiftcard where o.id = $idorder");
+
+
+  $order = $rs->fetchObject();
+  $page = "";
+  $balance_contable = giftcard_balance_value_enable($order->idgiftcard);
+  if($order->status == 1 )
+    $label_status = "Pendent";
+  elseif($order->status == 2 ){
+    $label_status = "Delivered";
+    drupal_set_message(t("this Purschase has already been Delivered ."), 'status', FALSE);
+    drupal_goto("admin/giftcard/orders");
+  }
+  elseif($order->status == 3 ){
+    $label_status = "Canceled";
+    drupal_set_message(t("this Purschase has already been Canceled ."), 'status', FALSE);
+    drupal_goto("admin/giftcard/orders");
+  }
+
+
+
+
+$html = <<<EOD
+<h3> Offer information:</h3>
+    <div class="row">
+        <span class="label"><b>Offer:</b></span>
+        <span class="text">{$order->title}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Cost:</b></span>
+        <span class="text">$ {$order->charge}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Gift card:</b></span>
+        <span class="text">{$order->code}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Gift card balance:</b></span>
+        <span class="text">$ {$balance_contable}</span>
+    </div>
+    <div class="row">
+        <span class="label"><b>Order Status:</b></span>
+        <span class="text"> {$label_status}</span>
+    </div>
+EOD;
+
+$form['hmtl'] = array('#markup' => $html);
+
+
+$form['idorder'] = array(
+    '#type' => 'hidden',
+    '#value' => $idorder,
+  );
+
+$form['balance_value'] = array(
+    '#type' => 'hidden',
+    '#value' => $order->balance_value,
+  );
+
+
+$form['charge'] = array(
+    '#type' => 'hidden',
+    '#value' => $order->charge,
+  );
+
+$form['idgiftcard'] = array(
+    '#type' => 'hidden',
+    '#value' => $order->idgiftcard,
+  );
+
+$form['status'] = array(
+    '#type' => 'hidden',
+    '#value' => $order->status,
+  );
+
+// $form['status'] = array(
+//   '#type' => 'select',
+//   '#title' => t('Status'),
+//   '#options' => array(
+//           // "all" => t('all'),
+//           1 => t('Pendent'),
+//           2 => t('Delivered'),
+//        ),
+//   // '#default_value'=>(!empty($_SESSION["giftcard"]["CODE"]))?$_SESSION["giftcard"]["CODE"]:"",
+// );
+
+$form['shipping'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Shipping:'),
+    '#required' => TRUE,
+    '#default_value'=>0
+  );
+
+$form['taxes'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Taxes:'),
+    '#required' => TRUE,
+    '#default_value'=>0
+  );
+
+// $form['total'] = array(
+//   '#markup' => "<div id=\"chargetotal\">
+//                 <span class=\"label\"><b>Final charge:</b> 
+//                 <span id=\"amount\">0</span> </span>
+//                 </div><br /> "
+// );
+
+$form['alert'] = array(
+'#markup'=> '<div id="alert"></div>',
+  );
+
+  $form['comment'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Comments:'),
+    '#required' => TRUE,
+    // '#default_value'=>0
+  );
+  // Adds a simple submit button that refreshes the form and clears its contents -- this is the default behavior for forms.
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+
+return $form;
+
+}
+
+function giftcard_list_orders_edit_form_validate($form, &$form_state) {
+  // $year_of_birth = $form_state['values']['year_of_birth'];
+  // if ($year_of_birth && ($year_of_birth < 1900 || $year_of_birth > 2000)) {
+  //   form_set_error('year_of_birth', 'Enter a year between 1900 and 2000.');
+  // }
+
+  $values = $form_state['values'];
+
+  //NO SE PUEDE REACTUALIZAR UN PEDIDO YA ENTREGADO
+  if($values["status"]== 2){
+    form_set_error('status', 'This Purchase has been Delivered already.');
+  }
+
+
+
+  //VALIDAR QUE SHIPPING + TAXES  NO SUPEREN EL BALANCE_VALUE DEL GIFTCARD
+  $balance_value_available = giftcard_balance_value_enable($values["idgiftcard"]);
+  $shipping = $values['shipping'];
+  $taxes = $values['taxes'];
+  $charge = $values["charge"];
+
+
+
+  if( ($shipping + $taxes + $charge ) > $balance_value_available ){
+    form_set_error('shipping', 'Exceded');
+    form_set_error('taxes', 'Exceded');
+    drupal_set_message(t("The Gift card don't have enough money, "), 'error', FALSE);
+  }
+
+
+}
+
+function giftcard_list_orders_edit_form_submit($form, &$form_state) {
+  
+$shipping = $form_state['values']['shipping'];
+$taxes = $form_state['values']['taxes'];
+$extra_charge = $shipping + $taxes; 
+$comment = $form_state['values']['comment'];
+// $status = $form_state['values']['status'];
+$idorder = $form_state['values']['idorder'];
+$delivered_date = date("Y-m-d H:s:i");
+//update Order
+$rs  = db_query("update orders set 
+                  shipping = $shipping ,
+                  taxes = $taxes , 
+                  final_charge = final_charge + $extra_charge , 
+                  comment = '$comment' , 
+                  status = 2  ,
+                  delivered_date = '$delivered_date'  
+                  where id = $idorder");
+
+//AGREGAR GIFTCARD DETAILS POR EXTRA CHARGE
+$idgiftcard = $form_state['values']['idgiftcard'];
+$type = 5;
+$description = 'Extra charge';
+$charge = $extra_charge;
+
+giftcard_register_detail($idgiftcard , $type , $description , $charge , $idorder   );
+
+ drupal_set_message(t("The purchase has been updated."), 'status', FALSE);
+ drupal_goto("admin/giftcard/orders");
+ 
+}
+
+
+
+function giftcard_list_orders_cancel_form($node, &$form_state){
+
+  $idorder = arg(4);
+  //DATOS DEL PEDIDO
+  $rs = db_query(" select o.id , o.idoffer , o.title , 
+g.code , u.name , g.balance_value , o.charge , o.order_details , o.status   , o.created
+, o.sh_name , o.sh_last_name , o.sh_email , o.sh_telephone , o.sh_address , o.sh_suite , 
+o.sh_city , o.sh_postalcode , g.id as idgiftcard
+from orders o
+left join users u on u.uid = o.client
+left join giftcard g on g.id = o.idgiftcard where o.id = $idorder");
+
+
+
+
+  $order = $rs->fetchObject();
+  $page = "";
+  $balance_contable = giftcard_balance_value_enable($order->idgiftcard);
+  if($order->status == 1 )
+    $label_status = "Pendent";
+  else
+    $label_status = "Delivered";
+
+
+if($order->status == 2){
+  drupal_set_message(t("this Purschase has already been Delivered ."), 'status', FALSE);
+  drupal_goto("admin/giftcard/orders");
+}elseif($order->status == 3){
+  drupal_set_message(t("this Purschase has already been Canceled ."), 'status', FALSE);
+  drupal_goto("admin/giftcard/orders");
+}
+
+$form['idorder'] = array(
+    '#type' => 'hidden',
+    '#value' => $idorder,
+  );
+
+$form['balance_value'] = array(
+    '#type' => 'hidden',
+    '#value' => $order->balance_value,
+  );
+
+
+$form['charge'] = array(
+    '#type' => 'hidden',
+    '#value' => $order->charge,
+  );
+
+$form['idgiftcard'] = array(
+    '#type' => 'hidden',
+    '#value' => $order->idgiftcard,
+  );
+
+$form['status'] = array(
+    '#type' => 'hidden',
+    '#value' => $order->status,
+  );
+
+$form['alert'] = array(
+'#markup'=> '<h2>Are you sure to delete this purchase ? </h2>',
+  );
+
+$form['comment'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Comments:'),
+  );
+ $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Accept',
+  );
+
+
+  $form['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => 'Cancel',
+  );
+
+return $form;
+}
+
+
+function giftcard_list_orders_cancel_form_submit($form, &$form_state){
+
+
+
+  if($form_state['clicked_button']["#value"] == "Accept"){
+    //ACTUALIZAR PEDIDO A CANCELADO
+    $shipping = $form_state['values']['shipping'];
+  $taxes = $form_state['values']['taxes'];
+  $extra_charge = $shipping + $taxes; 
+  $comment = $form_state['values']['comment'];
+  // $status = $form_state['values']['status'];
+  $idorder = $form_state['values']['idorder'];
+  $delivered_date = date("Y-m-d H:s:i");
+  //update Order
+  $rs  = db_query("update orders set 
+                    comment = '$comment' , 
+                    status = 3  
+                    where id = $idorder");
+    //ACTUALIZAR GIFTCARD DETALLE 
+  $idgiftcard = $form_state['values']['idgiftcard'];
+
+  $rs  = db_query("update giftcard_detail set 
+                    state = 0  
+                    where idorder = $idorder");
+      
+  //Actualizar balance_value
+  $charge = $form_state['values']['charge'];
+  db_query("update giftcard set balance_value = balance_value + $charge where id =$idgiftcard ");
+          
+  drupal_set_message(t("The Purschase has been canceled."), 'status', FALSE);
+
+  }
+
+ drupal_goto("admin/giftcard/orders");
+
+}
+
+
+
+
+
+
+
+
+
 
 
 

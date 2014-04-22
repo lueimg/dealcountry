@@ -3,3 +3,5 @@ Cambios a realizar en produccion :
   ☐ Subir tablas giftcard , detail , order , transaction
   ☐ Modulo giftcard
   ☐ agregar path giftcard al contexto http://dealcountry.dev/admin/structure/context/list/deals-list/edit
+  ☐  agregar context a menu myaccount http://dealcountry.dev/admin/structure/context/list/myaccount/edit
+  ☐ crear menu my account
