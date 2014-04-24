@@ -217,8 +217,8 @@ $databases = array (
     array (
       'database' => 'dealcountry',
       'username' => 'root',
-      'password' => '',
-      'host' => '127.0.0.1',
+      'password' => '123',
+      'host' => 'localhost',
       'port' => '',
       'driver' => 'mysql',
       'prefix' => '',
@@ -256,7 +256,7 @@ $update_free_access = FALSE;
  *   $drupal_hash_salt = file_get_contents('/home/example/salt.txt');
  *
  */
-$drupal_hash_salt = 'IQ9G8hfs-T0NRZLvjSVmha2E1-lsj4OM4qbGaJbgUT8';
+$drupal_hash_salt = 'fEt6b8Lg2pdtOdxrT3c6PI6pZU6mrsQGRhDWEjqm05o';
 
 /**
  * Base URL (optional).
@@ -278,7 +278,7 @@ $drupal_hash_salt = 'IQ9G8hfs-T0NRZLvjSVmha2E1-lsj4OM4qbGaJbgUT8';
  * It is not allowed to have a trailing slash; Drupal will add it
  * for you.
  */
- $base_url = 'http://dealcountry.dev';  // NO trailing slash!
+# $base_url = 'http://www.example.com';  // NO trailing slash!
 
 /**
  * PHP settings:

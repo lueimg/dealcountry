@@ -144,7 +144,7 @@
 
   <div class="row">
     <?php if (!empty($page['sidebar_first'])): ?>
-      <aside class="col-sm-3" role="complementary">
+      <aside class="col-sm-3 sidebar-first" role="complementary" >
         <?php print render($page['sidebar_first']); ?>
       </aside>  <!-- /#sidebar-first -->
     <?php endif; ?>
@@ -174,13 +174,13 @@
     </section>
 	
 	<?php if (!empty($page['sidebar_second_top'])): ?>
-      <aside class="col-sm-3 mini" role="complementary">
+      <aside class="col-sm-3 mini sidebar-second-top" role="complementary">
         <?php print render($page['sidebar_second_top']); ?>
       </aside>  <!-- /#sidebar-second top -->
     <?php endif; ?>
 
     <?php if (!empty($page['sidebar_second'])): ?>
-      <aside class="col-sm-3" role="complementary">
+      <aside class="col-sm-3 sidebar-second" role="complementary">
         <?php print render($page['sidebar_second']); ?>
       </aside>  <!-- /#sidebar-second -->
     <?php endif; ?>
