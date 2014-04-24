@@ -44,7 +44,27 @@ function giftcard_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('giftcard_add_form'),
     'access arguments' => array("administer giftcard"),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['admin/giftcard/view'] = array( 
+    'title' => t('Purchases'), 
+    'description' => '', 
+    'page callback' => 'giftcard_list_view',
+    'access arguments' => array("administer giftcard"),
+    'type' => MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+
+  $items['admin/giftcard/edit'] = array( 
+    'title' => t('Purchases'), 
+    'description' => '', 
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array("giftcard_list_edit_form"),
+    'access arguments' => array("administer giftcard"),
+    'type' => MENU_CALLBACK,
     // 'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
@@ -281,8 +301,9 @@ $nid = db_insert('giftcard') // Table name no longer needs {}
  * Utility Function for building links for the table
  */
  function _giftcard_generate_options($id){
-    $links = l(t('Edit'), "admin/giftcard/edit/$id").  '&nbsp;&nbsp;'.
-            l(t('Remove'), "admin/giftcard/remove/$id").  '&nbsp;&nbsp;'
+    $links = l(t('View'), "admin/giftcard/view/$id").  '&nbsp;&nbsp;'.
+              l(t('Edit'), "admin/giftcard/edit/$id").  '&nbsp;&nbsp;'
+            // l(t('Remove'), "admin/giftcard/remove/$id").  '&nbsp;&nbsp;'
             ;
     return $links;
  }
@@ -352,6 +373,7 @@ $header = array(
              array('data' => t('Service Fee'), 'field' => 'service_fee'),
              array('data' => t('Status'), 'field' => 'status'),
              array('data' => t('Created'), 'field' => 'created', 'sort' => 'asc'),
+             array('data' => t('Publish')),
              array('data' => t('Actions'), ),
            );
 
@@ -362,7 +384,12 @@ $header = array(
 $form = array();
  
 
-// $form['linkadd'] = array('#markup' => "<a href='/admin/giftcard/add'>Create Credit cards</a>");
+ $form['linksactions'] = array(
+  '#markup' => "<a href='/admin/giftcard/add'> + Create giftcards by range</a> "
+  // . " | " . "<a href=\"/admin/giftcard/unique\">Create One</a>"
+  . " | " . "<a href=\"/admin/giftcard/export\"> Export</a>"
+  . " | " . "<a href=\"/admin/giftcard/import\"> Import</a>"
+  );
 
 
 $form['filter'] = array(
@@ -415,14 +442,14 @@ $form['filter']['reset'] = array(
 //query
 $query = db_select('giftcard', 'g');
 
-    $query->fields('g', array('id', 'code', 'original_value','balance_value','client','start_date','end_date','service_fee','status',"created"));
+    $query->fields('g', array('id', 'code', 'original_value','balance_value','client','start_date','end_date','service_fee','status',"created","state"));
     $query->addField("u" , "name");
     $query->leftjoin("users" , "u" , "u.uid = g.client");
     $table_sort = $query->extend('TableSort') // Add table sort extender.
                         ->orderByHeader($header); // Add order by headers.
     
     $pager = $table_sort->extend('PagerDefault')
-                        ->limit(15); // 5 rows per page.
+                        ->limit(50); // 5 rows per page.
     // dsm($form_state);
     if (!empty($_SESSION["giftcard"]["CODE"])) {
       $query->condition('g.code', '%' . db_like($_SESSION["giftcard"]["CODE"]) . '%', 'LIKE');
@@ -452,6 +479,19 @@ $query = db_select('giftcard', 'g');
         
        
       }
+       switch ($res->state) {
+        case '0':
+          $state_label = "No";
+          break;case '1':
+          $state_label = "Si";
+          break;case '2':
+          $state_label = "Expirate";
+          break;
+        
+       
+      }
+
+
       $rows[$res->id] = array($res->id, 
                               $res->code, 
                             $res->original_value,
@@ -463,6 +503,7 @@ $query = db_select('giftcard', 'g');
                             $res->service_fee,
                             $status_label , 
                             $res->created , 
+                            $state_label , 
                             _giftcard_generate_options($res->id));
 
     }
@@ -1748,13 +1789,199 @@ function giftcard_list_orders_cancel_form_submit($form, &$form_state){
 }
 
 
+function giftcard_list_edit_form($node, &$form_state){
+
+
+ $idgiftcard = arg(3);
+  //DATOS DEL PEDIDO
+  $rs = db_query("select g.id , g.code,g.balance_value , g.status , u.name ,g.service_fee from giftcard g
+  left join users u on u.uid = g.client
+    where g.id = $idgiftcard");
+
+
+  $giftcard = $rs->fetchObject();
+  $page = "";
+  $balance_available = giftcard_balance_value_enable($giftcard->id);
+  if($giftcard->status == 0 )
+    $label_status = "Inactive";
+  elseif($giftcard->status == 1 ){
+    $label_status = "Active";
+
+  }
+  elseif($giftcard->status == 2 ){
+    $label_status = "Expirated";
+    
+  }
 
 
 
 
+$html = <<<EOD
+<h3> Gift Card information:</h3>
+    <div class="row">
+        <span class="label"><b>Giftcard code:</b></span>
+        <span class="text">{$giftcard->code}</span>
+    </div>
+    
+    <div class="row">
+        <span class="label"><b>Client:</b></span>
+        <span class="text">{$giftcard->name}</span>
+    </div>
+    
+    
+EOD;
+
+$form['hmtl'] = array('#markup' => $html);
+
+$form['balance_value'] = array(
+    '#type' => 'hidden',
+    '#value' => $giftcard->balance_value,
+  );
+
+
+$form['idgiftcard'] = array(
+    '#type' => 'hidden',
+    '#value' => $idgiftcard,
+  );
 
 
 
+$form['amount'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Update Amout to giftcard:'),
+    '#required' => TRUE,
+    '#default_value'=>$giftcard->balance_value
+  );
+
+$form['service_fee'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Edit Service Fee:'),
+    '#required' => TRUE,
+    '#default_value'=>$giftcard->service_fee
+  );
+
+$form['status'] = array(
+  '#type' => 'select',
+  '#title' => t('Status'),
+  '#options' => array(
+          
+          0 => t('Inactive'),
+          1 => t('Active'),
+          2 => t('Expirated'),
+       ),
+  '#default_value'=>$giftcard->status,
+);
+
+
+$form['alert'] = array(
+'#markup'=> '<div id="alert"></div>',
+  );
+
+  $form['comment'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Comments:'),
+    '#required' => TRUE,
+    // '#default_value'=>0
+  );
+  // Adds a simple submit button that refreshes the form and clears its contents -- this is the default behavior for forms.
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+
+  $form['Delete'] = array(
+    '#type' => 'submit',
+    '#value' => 'Delete',
+  );
+
+return $form;
+
+}
+
+
+function giftcard_list_edit_form_submit($form, &$form_state) {
+
+$values = $form_state["values"];
+$idgiftcard = $values["idgiftcard"];
+$balance_value = $values["balance_value"];
+$amount = $values["amount"];
+$service_fee = $values["service_fee"];
+$status = $values["status"];
+$comment = $values["comment"];
+
+if($form_state['clicked_button']["#value"] == "Delete"){
+
+  db_query('update giftcard set state = 0 where id ='.$idgiftcard);
+  giftcard_register_detail($idgiftcard , $type  = 8, $description  = 'gift card delete by administor'.$comment, $charge  = 0, $idorder = 0   );
+  drupal_set_message(t("The purchase has been deleted."), 'status', FALSE);
+  drupal_goto("admin/giftcard");
+}else{
+
+  if($amount != $balance_value){
+
+    $new_amount = abs($amount - $balance_value);
+    db_query('update giftcard set balance_value = '.$amount.' , service_fee = '.$service_fee.' , status = '.$status.' where id ='.$idgiftcard);
+    giftcard_register_detail($idgiftcard , $type  = 9, $description  = 'Administrator changed the balance value '.$comment , $charge  = $new_amount, $idorder = 0   );
+  drupal_set_message(t("The purchase has been updated."), 'status', FALSE);
+  drupal_goto("admin/giftcard");
+
+  }else{
+    db_query('update giftcard set   service_fee = '.$service_fee.' , status = '.$status.' where id ='.$idgiftcard);
+   
+  drupal_set_message(t("The purchase has been updated."), 'status', FALSE);
+  drupal_goto("admin/giftcard");
+
+
+    }
+  }  
+}
+
+
+
+function giftcard_list_view(){
+$idgiftcard = arg(3);
+
+
+
+$header = array(
+             array('data' => t('Date'), 'field'=> 'created'), // sort
+             array('data' => t('Type'), 'field'=> 'type'), // sort
+             array('data' => t('Concept'), 'field' => 'concept'),
+             array('data' => t('Charge'), 'field' => 'charge'),
+             array('data' => t('Order'), 'field' => 'order'),
+             array('data' => t('Transaction'), 'field' => 'code_transaction'),
+             
+           );
+
+//query
+$query = db_select('giftcard_detail', 'gd');
+
+    $query->fields('gd', array('type', 'concept', 'charge','created'));
+    $query->addField('o', 'title','ordertitle');
+    $query->addField('t', 'code_transaction','transaction');
+    $query->leftjoin('orders' ,'o','o.id = gd.idorder');
+    $query->leftjoin('transaction' ,'t','t.id = gd.idtransaction');
+    $query->condition("gd.idgiftcard" ,$idgiftcard , "=");
+    $table_sort = $query->extend('TableSort') // Add table sort extender.
+                        ->orderByHeader($header); // Add order by headers.
+    $pager = $table_sort->extend('PagerDefault')
+                        ->limit(15); // 5 rows per page.
+    $result = $pager->execute();
+
+    $rows = array();
+    foreach($result as $res){
+
+      $rows[] = array($res->created , $res->type , $res->concept , $res->charge , $res->ordertitle , $res->transaction );
+
+    }
+    $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'sort-table')));
+    $output .= theme('pager');
+    $table = $output ;
+
+
+    return $table;
+
+}
 
 
 

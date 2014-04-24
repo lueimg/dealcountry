@@ -5,9 +5,10 @@ Actividades:
 Administer:
   Giftcard:
     ☐ admin giftcard : Crear giftcar manual (codigo existente)
-    ☐ Editar y eliminar
+    ✔ Editar y eliminar @done (14-04-24 07:18)
+    ✔ View @done (14-04-24 07:18)
     ☐ Importar y exportar
-    ☐ Ver detalle
+    ✔ Ver detalle @done (14-04-24 07:18)
     Acciones en masa:
       ☐ Activar varios
       ☐ Agregar saldo a un rago de gitftcards
