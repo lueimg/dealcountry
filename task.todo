@@ -2,6 +2,9 @@ Actividades:
   ✔ Crear permisos para administracion de gift card @done (14-04-21 04:48)
   ✔ Cambiar boton que redirecciona a la pagina checkout @done (14-04-21 04:50)
   ✔ Insertar Pedido @done (14-04-21 10:44) 
+Previos : 
+ ☐ Cambiar paginador de listados
+
 Administer:
   Giftcard:
     ✔ Editar y eliminar @done (14-04-24 07:18)
@@ -9,9 +12,15 @@ Administer:
     ✔ Ver detalle @done (14-04-24 07:18)
     ☐ admin giftcard : Crear giftcar manual (codigo existente)
     ☐ Importar y exportar
+    ✔ Cambiar codigo  , el correlativo pertence al id generado @done (14-04-28 01:43)
+    ☐ Generar codigos en batch
+    ✔ filtros activo e inactivo @done (14-04-28 03:01)
+    ☐ Revisar disminucion de Balance
     Acciones en masa:
       ☐ Activar varios
       ☐ Agregar saldo a un rago de gitftcards
+  Purchases:
+    ☐ Agregar campo charge extra 
 
 
   Pedido:  
@@ -21,6 +30,7 @@ Administer:
     ✔ Validar reactualizacion de pedido cuando ya se agrego taxes and shipping @done (14-04-22 03:19)
     ✔ CANCELAR Pedido @done (14-04-22 04:25)
     ☐ Listado de Pedido Administracion :: filtros , usuario , fecha , estado
+    ☐ Guardar pedido en HTML y url de la imagen en la bd 
 
   Transacciones:
     ☐ Crear codigo invoice en primer momento
@@ -41,6 +51,7 @@ Compra:
   ☐ Link click here for shipping and taxes fee , abre colorbox con link a add funds
   ☐ Estilizar tipos de mensajes
   ☐ Giftcard Code : mostrar existentes con monto para usar.
+  ☐ Oferta agregar boton add funds
 Ofert:
   ☐ Agregar Boton add fonds
 
