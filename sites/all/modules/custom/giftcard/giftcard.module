@@ -166,7 +166,15 @@ $items['myaccount/addfunds/payment'] = array(
     // 'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
-
+$items['myaccount/addfunds/payment/receipt'] = array( 
+    'title' => t(''), 
+    'description' => '', 
+     'page callback' => 'giftcard_page_add_funds_payment_receipt',
+    // 'page arguments' => array('giftcard_order_form'),
+    'access arguments' => array('access content'),
+    'type' =>  MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
   return $items; 
 }
  
@@ -1220,6 +1228,9 @@ $html= <<<EOD
 <input type='hidden' name="x_show_form" value="payment_form">
 <input type='hidden' name="x_test_request" value="false" />
 <input type='hidden' name="x_method" value="cc">
+<input type='hidden' name="x_relay_response" value="true">
+<input type='hidden' name="x_relay_always" value="true">
+<input type='hidden' name="x_relay_url" value="http://dealcountry.dev/myaccount/addfunds/payment/receipt">
 <input type='submit' value="Click here for the secure payment form">
 </form>
 EOD;
@@ -2071,7 +2082,13 @@ $query = db_select('giftcard_detail', 'gd');
 
 }
 
+function giftcard_page_add_funds_payment_receipt(){
 
+   $data = $_POST;
+    $data = json_encode($data);
+
+return $data;
+}
 
 
 

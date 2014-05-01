@@ -19,8 +19,6 @@ Administer:
     Acciones en masa:
       ☐ Activar varios
       ☐ Agregar saldo a un rago de gitftcards
-  Purchases:
-    ☐ Agregar campo charge extra 
 
 
   Pedido:  
@@ -31,6 +29,8 @@ Administer:
     ✔ CANCELAR Pedido @done (14-04-22 04:25)
     ☐ Listado de Pedido Administracion :: filtros , usuario , fecha , estado
     ☐ Guardar pedido en HTML y url de la imagen en la bd 
+    ☐ Agregar campo charge extra 
+    ☐ 
 
   Transacciones:
     ☐ Crear codigo invoice en primer momento
