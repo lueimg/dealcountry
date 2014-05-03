@@ -72,7 +72,17 @@
  *
  * @ingroup themeable
  */
+global $user;
 ?>
+<div id="header-menu">
+  <div class="container">
+<?php if(!$user->uid){  ?>
+    <a href="/login" id="loginregister">LOG IN | SIGN UP</a>
+<?php }else{  ?>
+    <a href="/myaccount" id="loginregister">My account</a>
+<?php }  ?>
+  </div>
+</div>
 <header id="navbar" role="banner" class="<?php print $navbar_classes; ?>">
   <div class="container">
     <div class="navbar-header">

@@ -3,7 +3,7 @@ Actividades:
   ✔ Cambiar boton que redirecciona a la pagina checkout @done (14-04-21 04:50)
   ✔ Insertar Pedido @done (14-04-21 10:44) 
 Previos : 
- ☐ Cambiar paginador de listados
+ ✔ Cambiar paginador de listados @done (14-05-01 13:58)
 
 Administer:
   Giftcard:
@@ -33,30 +33,36 @@ Administer:
     ☐ 
 
   Transacciones:
-    ☐ Crear codigo invoice en primer momento
-    ☐ Recibir pago efectuado correctamente
+    ✔ Crear codigo invoice en primer momento @done (14-05-01 07:00)
+    ✔ Recibir pago efectuado correctamente @done (14-05-01 07:00)
+    ✔ Registrar pagoen dealcountry @done (14-05-01 07:00)
+    ✔ mostrar mensaje de compra @done (14-05-01 07:00)
+    ✔ Actualizar giftcard @done (14-05-01 07:00)
+    ✔ listado de transacciones por usuario @done (14-05-03 12:50)
+    ☐ Mantenimiento de transacciones
+    ☐ Agregar transaccion no registradas
+    ☐ Cancelar transaccion sospechosa
+
 
 My account:
   ✔ Menu My account :: stilizar @done (14-04-24 14:53)
   ✔ Listado Giftcards :: estilizar @done (14-04-24 14:53)
   ✔ Listado de pedidos de un usuario :: estilos @done (14-04-24 14:53)
-  ☐ Recarga Gift Card
-  ☐ Registrar Gift Card :: Falta opcion del menu
+  ✔ Recarga Gift Card @done (14-05-01 07:03)
+  ✔ Registrar Gift Card :: Falta opcion del menu @done (14-05-03 12:50)
   ☐ E-giftCard
 
 Compra:
   ✔ login / register one page : estilizar : Redireccionar a checkout @done (14-04-24 14:49)
   ✔ page checkout :: estilizar @done (14-04-24 14:49)
   ☐ Enviar Pedido por email
-  ☐ Link click here for shipping and taxes fee , abre colorbox con link a add funds
-  ☐ Estilizar tipos de mensajes
+  ✔ Link click here for shipping and taxes fee , abre colorbox con link a add funds @done (14-05-03 12:50)
+  ✔ Estilizar tipos de mensajes @done (14-05-03 12:50)
   ☐ Giftcard Code : mostrar existentes con monto para usar.
-  ☐ Oferta agregar boton add funds
+  ✔ Oferta agregar boton add funds @done (14-05-03 12:51)
 Ofert:
   ☐ Agregar Boton add fonds
 
-Transacciones:
-  ☐ Recibir pago de authorize
 Crons:
   ☐ Expiracion de giftcard
   ☐ Reduccion de charfe service fee
