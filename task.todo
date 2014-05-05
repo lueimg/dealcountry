@@ -61,11 +61,11 @@ Compra:
   ☐ Giftcard Code : mostrar existentes con monto para usar.
   ✔ Oferta agregar boton add funds @done (14-05-03 12:51)
 Ofert:
-  ☐ Agregar Boton add fonds
+  ✔ Agregar Boton add fonds @done (14-05-05 01:39)
 
 Crons:
   ☐ Expiracion de giftcard
-  ☐ Reduccion de charfe service fee
+  ☐ Reduccion de charge service fee
 Frontend:
   ☐ Menu Cabecera
   ☐ Menu Giftcard

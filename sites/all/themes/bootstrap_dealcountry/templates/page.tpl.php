@@ -115,8 +115,10 @@ global $user;
             <?php print render($secondary_nav); ?>
           <?php endif; ?>
           <?php if (!empty($page['navigation'])): ?>
-            <?php print render($page['navigation']); ?>
+            <?php //print $page['navigation']['#children'] ?>
+            <?php  print drupal_render($page['navigation']); ?>
           <?php endif; ?>
+          <?php  // dsm($page['navigation']); ?>
         </nav>
       </div>
     <?php endif; ?>

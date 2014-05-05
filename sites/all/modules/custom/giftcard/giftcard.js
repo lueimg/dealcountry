@@ -1,7 +1,7 @@
 jQuery().ready(function(){
 	//OCULTAR UN TAB DE LA PANTALLA USER 
 	jQuery('a[href$=hybridauth]').hide();
-
+	jQuery(".userregister .hybridauth-widget-wrapper").appendTo(jQuery(".userregister")).css("text-align","left");
 	//HTML DE PURCHASES , SE QUITA EL HTML NO NECESARIO
 	jQuery(".purchase.html .group-info-footer div:nth-child(3)").remove()
 

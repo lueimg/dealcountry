@@ -627,6 +627,7 @@ function giftcard_login(){
    . '</div>'
    . '<div class="formuser userlogin"> '
    . "<h2>Login in your account</h2>"
+   . "<span class=\"description\">If you alreadty have an account, please login here.</span>"
    . render( drupal_get_form('user_login'))
    . '</div>'
    ;
@@ -726,8 +727,8 @@ $form['nid'] = array(
         );
       $form['shipping']['suite'] = array(
           '#type' => 'textfield',
-          '#title' => t('Suite/Apt. *:'),
-          '#required' => TRUE,
+          '#title' => t('Suite/Apt.:'),
+          // '#required' => TRUE,
           '#default_value'=>""
         );
       $form['shipping']['city'] = array(
@@ -793,7 +794,7 @@ global $user;
 
 
 if(!$form_state['values']['agree']){
-  form_set_error('agree', 'Please read the "I Understand...');
+  form_set_error('agree', 'Please read the "I Understand..." message at the end of the page and agree to the terms by checking the box.');
 }
 
 
@@ -824,7 +825,7 @@ $giftcard = $rs->fetchObject();
   							$charge , 
   							$idorder  = $idorder );
 
-  drupal_set_message(t("Your Order have been registered , Please visit your orders in your <a href='/myaccount/purchase'>Account</a>"), 'status', FALSE);
+  drupal_set_message(t("Your Order has been registered , Please visit your orders in your <a href='/myaccount/purchase'>Account</a>"), 'status', FALSE);
   drupal_goto("node/".$values["nid"]);
 
 }
@@ -1123,7 +1124,10 @@ $header = array(
     }
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'sort-table','class'=>"giftcards")));
     $output .= theme('pager');
-    $table = $output ;
+    if(count($rows) == 0){
+      $vacio = "<br>You don´t have any Gift Cards registered. Add a new Gift Card <a href=\"myaccount/register-giftcard\">HERE.</a>";
+    }
+    $table = $output.$vacio ;
 
 // TABLE TRANSACTION
     $header = array(
@@ -1162,7 +1166,7 @@ $header = array(
 
 
     drupal_set_title("My Gift Cards");
-    $page = "";
+    $page = "<a href=\"/myaccount/register-giftcard\">+ Register Gift Card</a>";
 
     $title2 = "<h3 class='subtitle'>Transaction History</h3>";
 
@@ -1173,7 +1177,13 @@ $header = array(
 
 function giftcard_page_purchase(){
 	
-global $user; 
+// global $user; 
+
+   global $user;
+
+  if(!$user->uid)
+    drupal_goto("login",array('query'=>drupal_get_destination()));
+
 $query = db_select('orders', 'o')
 
     ->fields('o', array('id', 'idoffer', 'idgiftcard','status','created','html'));
@@ -1188,7 +1198,7 @@ $query = db_select('orders', 'o')
     	// dsm($value);
       switch ($row->status) {
         case '1':
-          $status_label = "Pendent";
+          $status_label = "Pending";
           break;
 case '2':
           $status_label = "Delivered";
@@ -1220,7 +1230,10 @@ case '2':
 function giftcard_page_add_funds(){
 	
 //GENERAR ORDEN DE PAGO
-	
+ global $user;
+
+  if(!$user->uid)
+    drupal_goto("login",array('query'=>drupal_get_destination()));	
 
 $form = drupal_get_form("giftcard_page_add_funds_form");
 // $form2 = drupal_get_form("giftcard_pay_user_settings_form");
@@ -1279,8 +1292,8 @@ $form['amount'] = array(
           '#type' => 'textfield',
           '#title' => t('Select the amount:'),
           '#required' => TRUE,
-          '#default_value'=>"5.00",
-          '#attributes' => array('class'=>array('part3'),'placeholder'=>array('Minimum $ 5.00')),
+          // '#default_value'=>"5.00",
+          '#attributes' => array('class'=>array('part3'),'placeholder'=>array('$5.00 is the minimum charge required')),
 
         );
 
@@ -1399,7 +1412,7 @@ $html= <<<EOD
 <INPUT TYPE=HIDDEN NAME="x_cust_id" VALUE="{$user->uid}">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_method" VALUE="POST">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_text" VALUE="Click here to return to our home page">
-<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="http://dealcountry.dev/myaccount/addfunds/payment/receipt">
+<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="http://dealcountry.planeosweb.com/myaccount/addfunds/payment/receipt">
 <input type='submit' value="Click here for the secure payment form">
 </form>
 EOD;

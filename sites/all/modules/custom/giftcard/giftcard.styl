@@ -23,13 +23,23 @@ gris_azulado = #E4E8F1
 				border-radius 5px
 				padding 1em 1em 1em 3em
 				color white
-			.dropdown-menu
-				background none
+			ul.dropdown-menu
+				background white
 				box-shadow none
 				border none
-				a
-					background rojo
-					padding 1em
+				li
+					background none
+					width 100%
+					a
+						background none
+						padding 1em
+						color #000
+						&:hover
+							background none
+							border-radius none
+							// text-decoration underline
+							color white
+							width 100%
 
 
 #header-menu
@@ -43,6 +53,7 @@ gris_azulado = #E4E8F1
 	.page-header
 		color color_red 
 		font-size 1.5em
+		border-bottom none
 	legend.panel-heading
 		background none
 		border none
@@ -68,6 +79,23 @@ gris_azulado = #E4E8F1
 	.applicabletaxes
 		padding 1em
 		display inline-block
+
+	.col-sm-9
+		background #fff
+	.view-selected-deal 
+		.masonry-item
+			width 100%
+	fieldset
+		width 49%
+		display inline-block 
+		border none
+		&#edit-userdata
+			.panel-body
+				padding-left 0
+		&#edit-shipping
+			.panel-body
+				padding-right 0
+				width 370px
 
 .page-login
 	.main-container
@@ -97,23 +125,22 @@ gris_azulado = #E4E8F1
 			display none
 		&.userregister
 			border-right 1px solid #ccc 
+			.form-type-password 
+				input#edit-pass
+					width 318px
+		&.userlogin
+			.hybridauth-widget-wrapper
+				display none
 	.page-header 
 	.logo-home
 		display: none;
 
 
-.page-giftcard-order
-	.col-sm-9
-		background #fff
-	.view-selected-deal 
-		.masonry-item
-			width 100%
-	fieldset
-		width 49%
-		display inline-block 
 
 
 .page-myaccount
+	.page-header
+		border-bottom none
 	table
 		th
 			background color_plomo
@@ -167,6 +194,20 @@ gris_azulado = #E4E8F1
 						a
 							// background-color rojo
 							background-image url('../../../themes/bootstrap_dealcountry/images/ico-more.png')
+					&:nth-child(5)
+						a
+							// background-color rojo
+							background-image none
+					&:nth-child(6)
+						a
+							// background-color rojo
+							background-image none
+					&:nth-child(7)
+						a
+							// background-color rojo
+							background-image none
+
+
 
 	.col-sm-9
 		padding 0 
@@ -196,9 +237,11 @@ gris_azulado = #E4E8F1
 		.details
 			background gris_azulado
 			.label
-				color rojo
 			.data
-				font-size: .8em
+				font-size: 1.1em
+			.label
+				color rojo
+			
 				
 
 .page-myaccount-addfunds
@@ -225,6 +268,8 @@ gris_azulado = #E4E8F1
 
 			// background rojo
 
+.navbar.navbar-static-top.navbar-default 
+	z-index: 999999;
 
 
 /*  Estilos de  la administracion */		
