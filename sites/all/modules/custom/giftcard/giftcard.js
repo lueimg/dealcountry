@@ -22,4 +22,20 @@ jQuery().ready(function(){
 		}
 	});
 
+
+	
+	
+	jQuery(".page-admin-giftcard-orders-edit .form-type-textfield").keyup(function(){
+		//FINAL CHARGE EN page-admin-giftcard-orders-edit
+	var charge = jQuery(".page-admin-giftcard-orders-edit [name=charge]").val() * 1;
+	var ship = jQuery(".page-admin-giftcard-orders-edit #edit-shipping").val() * 1;
+	var tax = jQuery(".page-admin-giftcard-orders-edit #edit-taxes").val() * 1;
+	var extra = jQuery(".page-admin-giftcard-orders-edit #edit-extra").val() * 1;
+ 	var total  = charge + ship + tax + extra ;
+ 	
+	jQuery("#chargetotal #amount").text(total.toFixed(2));
+	//console.log("calulando ...")
+
+	});
+
 });

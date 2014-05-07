@@ -420,8 +420,9 @@ $form = array();
  
 
  $form['linksactions'] = array(
-  '#markup' => "<a href='/admin/giftcard/add'> + Create giftcards by range</a> "
-  // . " | " . "<a href=\"/admin/giftcard/unique\">Create One</a>"
+  '#markup' => 
+  "<a href='/admin/giftcard/add'> + Create giftcards by range</a> "
+  . " | " . "<a href=\"/admin/giftcard/addunique\"> Create Gift by Number</a>"
   . " | " . "<a href=\"/admin/giftcard/export\"> Export</a>"
   . " | " . "<a href=\"/admin/giftcard/import\"> Import</a>"
   );
@@ -1019,25 +1020,28 @@ function giftcard_register_to_user( $code , $uid ){
 }
 
 
-
+/*
+Disminuye el balance de un giftcard
+si envio el nid , se desminuira en funcion del costo de esa oferta
+si solo envio el codigo  y el charge , se disminuira 
+*/
 function giftcard_discrease_balance_value( $code , $nid = 0  , $charge = 0){
-	
-	// $rs = db_query("select * from giftcard g where g.state = 1 and g.status = 1 and g.end_date >= NOW() AND g.code = '".$code."'");	
-  if($nid){
-
-      $rs = db_query("select *  from giftcard g 
-       where g.state = 1 and g.status = 1 and g.start_date <= NOW() and CONCAT(code,'-',id) = '".$code."'");
-    
-
+	dsm($code);
+  // $rs = db_query("select * from giftcard g where g.state = 1 and g.status = 1 and g.end_date >= NOW() AND g.code = '".$code."'");  
+    $rs = db_query("select *  from giftcard g 
+     where g.state = 1 and g.status = 1 and g.start_date <= NOW() and CONCAT(code,'-',id) = '".$code."'");
   	$giftcard = $rs->fetchObject(); 
-  	//OBTENER MONTO DE LA OFERTA
-  	$node = node_load($nid);
+
+   // PROBLEMAS CON DESINCREMENTO 
+  if(!empty($nid)){
+  	   //OBTENER MONTO DE LA OFERTA
+  	   $node = node_load($nid);
   		// $price = field_get_items('node', $node, 'field_deal_price_value');
   		$price = $node->field_deal_price_value['und'][0]['value'];
   		$balance_value = $giftcard->balance_value;
-
-
+      
   }else{
+    //monto a disminuir
     $price  = $charge;
   }
 
@@ -1188,7 +1192,7 @@ $query = db_select('orders', 'o')
 
     ->fields('o', array('id', 'idoffer', 'idgiftcard','status','created','html'));
     $query->addField("g","code","code");
-    $query->addField("g","id","id");
+    $query->addField("g","id","idgift");
     $query->leftjoin("giftcard" , "g" , "g.id = o.idgiftcard");
     $query->condition("o.client" , $user->uid , "=");
     $rs = $query->execute()->fetchAll();
@@ -1215,7 +1219,7 @@ case '2':
 		$offers .=  $row->html;
 		$offers .=  "<div class=\"details\">"
 					."<span class=\"wrapper\"> <span class=\"label\">Purchase Data</span><span class=\"data\">".$row->created ."</span> </span>"
-					."<span class=\"wrapper\"> <span class=\"label\">Payed with Gift card</span><span class=\"data\">".$row->code . '-'.$row->id."</span> </span>"
+					."<span class=\"wrapper\"> <span class=\"label\">Payed with Gift card</span><span class=\"data\">".$row->code . '-'.$row->idgift."</span> </span>"
 					."<span class=\"wrapper\"> <span class=\"label\">Status</span><span class=\"data\">".$status_label."</span> </span>" . 
 					"</div>";
 		$offers .=  "</div>";
@@ -1439,6 +1443,7 @@ $header = array(
              array('data' => t('Charge'), 'field' => 'charge'),
              array('data' => t('Shipping'), 'field' => 'shipping'),
              array('data' => t('Taxes'), 'field' => 'taxes'),
+             array('data' => t('Extra charge'), 'field' => 'extra'),
              array('data' => t('Final Charge'), 'field' => 'final_charge'),
              array('data' => t('Order Details'), 'field' => 'order_details'),
              array('data' => t('Created'), 'field' => 'created'),
@@ -1486,7 +1491,7 @@ $form['filter']['submit'] = array(
 
 $query = db_select('orders', 'o');
 
-    $query->fields('o', array('id', 'idoffer', 'title','charge','shipping' , 'taxes' , 'final_charge', 'delivered_date', 'order_details','status','created'));
+    $query->fields('o', array('id', 'idoffer', 'title','charge','shipping' , 'taxes' ,"extra", 'final_charge', 'delivered_date', 'order_details','status','created'));
     $query->fields('g', array('code', 'balance_value'));
     $query->fields('u', array('name'));
     $query->addField("g","id","idgiftcard");
@@ -1541,6 +1546,7 @@ $query = db_select('orders', 'o');
                               $res->charge,
                               $res->shipping,
                               $res->taxes,
+                              $res->extra,
                               $res->final_charge,
                               $res->order_details,
                               $res->created , 
@@ -1779,8 +1785,8 @@ $html = <<<EOD
         <span class="text">{$order->title}</span>
     </div>
     <div class="row">
-        <span class="label"><b>Cost:</b></span>
-        <span class="text">$ {$order->charge}</span>
+        <span class="label"><b>Details:</b></span>
+        <span class="text">{$order->order_details}</span>
     </div>
     <div class="row">
         <span class="label"><b>Gift card:</b></span>
@@ -1793,6 +1799,10 @@ $html = <<<EOD
     <div class="row">
         <span class="label"><b>Order Status:</b></span>
         <span class="text"> {$label_status}</span>
+    </div>
+    <div class="row" style="font-size: 20px;">
+        <span class="label"><b>Cost:</b></span>
+        <span class="text">$ {$order->charge}</span>
     </div>
 EOD;
 
@@ -1819,7 +1829,10 @@ $form['idgiftcard'] = array(
     '#type' => 'hidden',
     '#value' => $order->idgiftcard,
   );
-
+$form['giftcode'] = array(
+    '#type' => 'hidden',
+    '#value' => $order->code,
+  );
 $form['status'] = array(
     '#type' => 'hidden',
     '#value' => $order->status,
@@ -1856,12 +1869,12 @@ $form['extra'] = array(
     '#required' => TRUE,
     '#default_value'=>0
   );
-// $form['total'] = array(
-//   '#markup' => "<div id=\"chargetotal\">
-//                 <span class=\"label\"><b>Final charge:</b> 
-//                 <span id=\"amount\">0</span> </span>
-//                 </div><br /> "
-// );
+ $form['total'] = array(
+   '#markup' => "<div id=\"chargetotal\">
+                 <span class=\"label\"><b>Final charge:</b> $ 
+                 <span id=\"amount\">$order->charge</span> </span>
+                 </div><br /> "
+ );
 
 $form['alert'] = array(
 '#markup'=> '<div id="alert"></div>',
@@ -1931,6 +1944,7 @@ $delivered_date = date("Y-m-d H:s:i");
 $rs  = db_query("update orders set 
                   shipping = $shipping ,
                   taxes = $taxes , 
+                  extra = $extra ,
                   final_charge = final_charge + $extra_charge , 
                   comment = '$comment' , 
                   status = 2  ,
@@ -1945,7 +1959,8 @@ $charge = $extra_charge;
 
 giftcard_register_detail($idgiftcard , $type , $description , $charge , $idorder   );
 //ACUDATE BALANCE VALUE WITH EXTRA CHARGE
-giftcard_discrease_balance_value( $code , $nid = 0  , $charge);
+$giftcode = $form_state['values']['giftcode'];
+giftcard_discrease_balance_value( $giftcode  , $nid = 0  , $charge);
 
 
  drupal_set_message(t("The purchase has been updated."), 'status', FALSE);

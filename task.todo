@@ -10,11 +10,11 @@ Administer:
     ✔ Editar y eliminar @done (14-04-24 07:18)
     ✔ View @done (14-04-24 07:18)
     ✔ Ver detalle @done (14-04-24 07:18)
+    ✔ Cambiar codigo  , el correlativo pertence al id generado @done (14-04-28 01:43)
+    ✔ filtros activo e inactivo @done (14-04-28 03:01)
     ☐ admin giftcard : Crear giftcar manual (codigo existente)
     ☐ Importar y exportar
-    ✔ Cambiar codigo  , el correlativo pertence al id generado @done (14-04-28 01:43)
     ☐ Generar codigos en batch
-    ✔ filtros activo e inactivo @done (14-04-28 03:01)
     ☐ Revisar disminucion de Balance
     Acciones en masa:
       ☐ Activar varios
@@ -51,6 +51,7 @@ My account:
   ✔ Recarga Gift Card @done (14-05-01 07:03)
   ✔ Registrar Gift Card :: Falta opcion del menu @done (14-05-03 12:50)
   ☐ E-giftCard
+  ☐ My purchase , add details del pedido
 
 Compra:
   ✔ login / register one page : estilizar : Redireccionar a checkout @done (14-04-24 14:49)
