@@ -15,10 +15,10 @@ Administer:
     ☐ admin giftcard : Crear giftcar manual (codigo existente)
     ☐ Importar y exportar
     ☐ Generar codigos en batch
-    ☐ Revisar disminucion de Balance
+    ✔ Revisar disminucion de Balance @done (14-05-07 16:43)
     Acciones en masa:
       ☐ Activar varios
-      ☐ Agregar saldo a un rago de gitftcards
+      ☐ Agregar saldo a un rango de gitftcards
 
 
   Pedido:  
@@ -27,10 +27,9 @@ Administer:
     ✔ Cambiar de Estado al pedido @done (14-04-22 03:19)
     ✔ Validar reactualizacion de pedido cuando ya se agrego taxes and shipping @done (14-04-22 03:19)
     ✔ CANCELAR Pedido @done (14-04-22 04:25)
+    ✔ Guardar pedido en HTML y url de la imagen en la bd @done (14-05-07 16:47)
+    ✔ Agregar campo charge extra @done (14-05-07 16:47)
     ☐ Listado de Pedido Administracion :: filtros , usuario , fecha , estado
-    ☐ Guardar pedido en HTML y url de la imagen en la bd 
-    ☐ Agregar campo charge extra 
-    ☐ 
 
   Transacciones:
     ✔ Crear codigo invoice en primer momento @done (14-05-01 07:00)
@@ -56,9 +55,9 @@ My account:
 Compra:
   ✔ login / register one page : estilizar : Redireccionar a checkout @done (14-04-24 14:49)
   ✔ page checkout :: estilizar @done (14-04-24 14:49)
-  ☐ Enviar Pedido por email
   ✔ Link click here for shipping and taxes fee , abre colorbox con link a add funds @done (14-05-03 12:50)
   ✔ Estilizar tipos de mensajes @done (14-05-03 12:50)
+  ☐ Enviar Pedido por email
   ☐ Giftcard Code : mostrar existentes con monto para usar.
   ✔ Oferta agregar boton add funds @done (14-05-03 12:51)
 Ofert:
@@ -68,7 +67,7 @@ Crons:
   ☐ Expiracion de giftcard
   ☐ Reduccion de charge service fee
 Frontend:
-  ☐ Menu Cabecera
+  ✔ Menu Cabecera @done (14-05-07 16:48)
   ☐ Menu Giftcard
 
 

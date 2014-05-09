@@ -422,9 +422,7 @@ $form = array();
  $form['linksactions'] = array(
   '#markup' => 
   "<a href='/admin/giftcard/add'> + Create giftcards by range</a> "
-  . " | " . "<a href=\"/admin/giftcard/addunique\"> Create Gift by Number</a>"
   . " | " . "<a href=\"/admin/giftcard/export\"> Export</a>"
-  . " | " . "<a href=\"/admin/giftcard/import\"> Import</a>"
   );
 
 
@@ -609,6 +607,7 @@ function giftcard_list_form_submit($form, &$form_state) {
   }else{
     $form_state['values'] = array();
     unset($_SESSION["giftcard"]);
+    drupal_goto("admin/giftcard");
   }
 
    
@@ -809,10 +808,11 @@ $values  = $form_state["values"];
 $rs = db_query("select * from giftcard g where g.state = 1 and g.status = 1 and g.start_date <= NOW() AND CONCAT(code,'-',id) = '".$values["giftcard"]."'");
 		
 $giftcard = $rs->fetchObject(); 
-// dsm($giftcard);;
+
 // VALIDAR PEDIDO
 // dsm("select * from giftcard g where g.state = 1 and g.status = 1 and g.start_date <= NOW() AND CONCAT(code,'-',id) = '".$values["giftcard"]."'");
 // AGREGAR GIFT CARD AL USUARIO
+
   $add = giftcard_register_to_user( $values["giftcard"] , $user->uid );
 // DISMINUIR GIFTCARD
   $charge = giftcard_discrease_balance_value( $values["giftcard"] , $values["nid"] );
@@ -832,7 +832,7 @@ $giftcard = $rs->fetchObject();
 }
 
 function giftcard_validate_code( $code , $uid , $nid ){
-
+  $code  = trim($code);
 		$rs = db_query("select *  from giftcard g 
      where g.state = 1 and g.status = 1 and g.start_date <= NOW() and CONCAT(code,'-',id) = '".$code."'");
 		
@@ -901,7 +901,7 @@ function giftcard_ajax_validate($form, $form_state) {
 	$uid = $user->uid;
 
 
-	$respuesta = giftcard_validate_code( $code , $uid , $nid );
+	$respuesta = giftcard_validate_code( trim($code) , $uid , $nid );
 	$resp = $respuesta["message"];
   $validate= $respuesta["validate"];
   if(!$validate){
@@ -986,7 +986,9 @@ $offer =  $view->preview('default', $args);
        return $nid;
 }
 
-
+/*
+ * $code is giftcardcode + id
+ */
 function giftcard_register_to_user( $code , $uid ){
 
 	// VALIDAR QUE EXISTA
@@ -1025,12 +1027,24 @@ Disminuye el balance de un giftcard
 si envio el nid , se desminuira en funcion del costo de esa oferta
 si solo envio el codigo  y el charge , se disminuira 
 */
-function giftcard_discrease_balance_value( $code , $nid = 0  , $charge = 0){
-	dsm($code);
-  // $rs = db_query("select * from giftcard g where g.state = 1 and g.status = 1 and g.end_date >= NOW() AND g.code = '".$code."'");  
-    $rs = db_query("select *  from giftcard g 
-     where g.state = 1 and g.status = 1 and g.start_date <= NOW() and CONCAT(code,'-',id) = '".$code."'");
-  	$giftcard = $rs->fetchObject(); 
+function giftcard_discrease_balance_value( $codefull = 0 , $nid = 0  , $charge = 0 ,$giftid  = 0){
+      
+    if(!empty($codefull)){
+      
+        $rs = db_query("select *  from giftcard g 
+         where g.state = 1 and g.status = 1 and g.start_date <= NOW() and CONCAT(code,'-',id) = '".$codefull."'");
+      	$giftcard = $rs->fetchObject(); 
+
+    }elseif(!empty($giftid)){
+        $rs = db_query("select *  from giftcard g 
+         where g.state = 1 and g.status = 1 and g.start_date <= NOW() and id = $giftid");
+        $giftcard = $rs->fetchObject(); 
+    }
+    if(empty($giftcard)){
+      $data  =func_get_args();
+      drupal_set_message("We have had a problem with the giftcard." . json_encode($data));
+      return false;
+    }
 
    // PROBLEMAS CON DESINCREMENTO 
   if(!empty($nid)){
@@ -1128,6 +1142,7 @@ $header = array(
     }
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'sort-table','class'=>"giftcards")));
     $output .= theme('pager');
+    $vacio = "";
     if(count($rows) == 0){
       $vacio = "<br>You don´t have any Gift Cards registered. Add a new Gift Card <a href=\"myaccount/register-giftcard\">HERE.</a>";
     }
@@ -1838,16 +1853,7 @@ $form['status'] = array(
     '#value' => $order->status,
   );
 
-// $form['status'] = array(
-//   '#type' => 'select',
-//   '#title' => t('Status'),
-//   '#options' => array(
-//           // "all" => t('all'),
-//           1 => t('Pendent'),
-//           2 => t('Delivered'),
-//        ),
-//   // '#default_value'=>(!empty($_SESSION["giftcard"]["CODE"]))?$_SESSION["giftcard"]["CODE"]:"",
-// );
+
 
 $form['shipping'] = array(
     '#type' => 'textfield',
@@ -1959,8 +1965,8 @@ $charge = $extra_charge;
 
 giftcard_register_detail($idgiftcard , $type , $description , $charge , $idorder   );
 //ACUDATE BALANCE VALUE WITH EXTRA CHARGE
-$giftcode = $form_state['values']['giftcode'];
-giftcard_discrease_balance_value( $giftcode  , $nid = 0  , $charge);
+
+giftcard_discrease_balance_value( 0  , $nid = 0  , $charge ,$idgiftcard);
 
 
  drupal_set_message(t("The purchase has been updated."), 'status', FALSE);
