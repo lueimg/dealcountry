@@ -3393,5 +3393,28 @@ function giftcard_validacion_pago(){
 
 
 
-  
+
 }
+
+/*
+
+CREATE TABLE `NewTable` (
+`id`  int(11) NOT NULL AUTO_INCREMENT ,
+`name`  varchar(300) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL ,
+`email`  varchar(300) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL ,
+`amount`  decimal(10,2) NULL DEFAULT NULL ,
+`idtransaction`  int(11) NULL DEFAULT NULL ,
+`idgiftcard`  int(11) NULL DEFAULT NULL ,
+`status`  char(1) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT '0' COMMENT '0 inactivo , 1 pagado , 2 anulado.' ,
+`created`  datetime NULL DEFAULT NULL ,
+`updated`  datetime NULL DEFAULT NULL ,
+`user`  int(11) NULL DEFAULT NULL ,
+PRIMARY KEY (`id`)
+)
+ENGINE=InnoDB
+DEFAULT CHARACTER SET=latin1 COLLATE=latin1_swedish_ci
+AUTO_INCREMENT=1
+ROW_FORMAT=COMPACT
+;
+
+*/
