@@ -97,13 +97,41 @@ $items['admin/giftcard/orders'] = array(
   );
 
 $items['admin/giftcard/transaction'] = array( 
-    'title' => t('Purchases'), 
+    'title' => t('Transactions'), 
     'description' => '', 
     'page callback' => 'drupal_get_form',
     'page arguments' => array('giftcard_list_transaction_form'),
     'access arguments' => array("administer giftcard"),
     'type' => MENU_LOCAL_TASK,
     // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+$items['admin/giftcard/transaction/view'] = array( 
+    'title' => t('Purchases'), 
+    'description' => '', 
+    'page callback' => 'giftcard_list_transaction_view',
+    'access arguments' => array("administer giftcard"),
+    'type' => MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['admin/giftcard/transaction/edit'] = array( 
+    'title' => t('Purchases'), 
+    'description' => '', 
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array("giftcard_list_transaction_edit_form"),
+    'access arguments' => array("administer giftcard"),
+    'type' => MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['admin/giftcard/transaction/cancel'] = array( 
+    'title' => t('Purchases'), 
+    'description' => '', 
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array("giftcard_list_transaction_cancel_form"),
+    'access arguments' => array("administer giftcard"),
+    'type' => MENU_CALLBACK,
   );
   
   $items['admin/giftcard/settings'] = array( 
@@ -389,7 +417,14 @@ $nid = db_insert('giftcard') // Table name no longer needs {}
     return $links;
  }
 
-
+ function _giftcard_transaction_generate_options($id){
+    $links = 
+            // l(t('View'), "admin/giftcard/transaction/view/$id").  '&nbsp;&nbsp;'.
+             l(t('Edit'), "admin/giftcard/transaction/edit/$id").  '&nbsp;&nbsp;'
+            // .l(t('Cancel'),"admin/giftcard/transaction/cancel/$id").  '&nbsp;&nbsp;'
+            ;
+    return $links;
+ }
 
 // function giftcard_list(){
 
@@ -564,6 +599,7 @@ $query = db_select('giftcard', 'g');
 
     $query->fields('g', array('id', 'code', 'original_value','balance_value','client','start_date','end_date','service_fee','status',"created","state"));
     $query->addField("u" , "name");
+    // $query->addExpression("CONCAT(g.code, '-', g.id)", 'codefull');
     $query->leftjoin("users" , "u" , "u.uid = g.client");
     $table_sort = $query->extend('TableSort') // Add table sort extender.
                         ->orderByHeader($header); // Add order by headers.
@@ -579,11 +615,12 @@ $query = db_select('giftcard', 'g');
   
     // dsm($form_state);
     if (!empty($_SESSION["giftcard"]["CODE"])) {
-      $or = db_or();
-      $or->condition('g.code', '%' . db_like($_SESSION["giftcard"]["CODE"]) . '%', 'LIKE');
-      $or->condition('g.id', '%' . db_like($_SESSION["giftcard"]["CODE"]) . '%', 'LIKE');
-      $query->condition($or);
-      // $query->condition('g.code', '%' . db_like($_SESSION["giftcard"]["CODE"]) . '%', 'LIKE');
+      // $or = db_or();
+      // $or->condition('g.code', '%' . db_like($_SESSION["giftcard"]["CODE"]) . '%', 'LIKE');
+      // $or->condition('g.id', '%' . db_like($_SESSION["giftcard"]["CODE"]) . '%', 'LIKE');
+      // $query->condition($or);
+      // $query->condition('codefull', '%' . db_like($_SESSION["giftcard"]["CODE"]) . '%', 'LIKE');
+      $query->where("CONCAT(g.code, '-', g.id) LIKE :q", array(':q'=>'%' . db_like($_SESSION["giftcard"]["CODE"]) . '%'));
     }    
 
      if (!empty($_SESSION["giftcard"]["rangeini"])) {
@@ -1523,7 +1560,7 @@ if($form_state['values']['amount'] < 5  ){
   }
 
   $sql = "select *  from giftcard g 
-     where g.state = 1 and g.status = 1 and g.start_date <= NOW() and CONCAT(code,'-',id) = '".$code."'";
+     where g.state = 1 and g.status = 1 and  CONCAT(code,'-',id) = '".$code."'";
   // drupal_set_message(t($sql), 'status', FALSE);
   $rs = db_query($sql);
     
@@ -1607,7 +1644,7 @@ $html= <<<EOD
 <INPUT TYPE=HIDDEN NAME="x_cust_id" VALUE="{$user->uid}">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_method" VALUE="POST">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_text" VALUE="Click here to return to our home page">
-<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="http://dealcountry.planeosweb.com/myaccount/addfunds/payment/receipt">
+<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="http://hispanero.com/myaccount/addfunds/payment/receipt">
 <input type='submit' value="Click here for the secure payment form">
 </form>
 EOD;
@@ -2842,22 +2879,334 @@ if($form_state['clicked_button']["#value"] == "Cancel"){
       drupal_goto("admin/giftcard");
     
   }
-
-
-
-
-
-
 }
 
 
 
 
-function giftcard_list_transaction_form(){}
+function giftcard_list_transaction_form($node, &$form_state){
+
+$header = array(
+             array('data' => t('ID'), 'field' => 'id', 'sort' => 'desc'), // sort
+             array('data' => t('Code transaction'), 'field' => 'code_transaction'),
+             array('data' => t('Giftcard') ),
+             array('data' => t('Type'), 'field' => 'type'),
+             array('data' => t('charge'), 'field' => 'charge'),
+             array('data' => t('client'), ),
+             array('data' => t('Status'), ),
+             array('data' => t('Message Transaction'), 'field' => 'message_transaction'),
+             array('data' => t('Auth code'), 'field' => 'auth_code'),
+             array('data' => t('Card Type'), 'field' => 'card_type'),
+             array('data' => t('Account number'), 'field' => 'account_number'),
+             array('data' => t('Created'), 'field' => 'created'),
+             array('data' => t('Status'), 'field' => 'state'),
+             array('data' => t('Actions'), ),
+           );
+
+$form = array();
+ 
+
+$form['filter'] = array(
+  '#type' => 'fieldset',
+  '#collapsible' => TRUE,
+  '#collapsed' => FALSE,
+  '#title' => t('Filter option')
+);
+$form['filter']['status'] = array(
+  '#type' => 'select',
+  '#title' => t('Status'),
+  '#options' => array(
+          "all" => t('all'),
+          0 => t('On Request'),
+          1 => t('Paid'),
+          2 => t('Rejected'),
+       ),
+  '#default_value'=>$_SESSION["giftcard"]["transaction"]["status"],
+);
+
+
+$form['filter']['submit'] = array(
+  '#type' => 'submit',
+  '#value' => t('Filter'),
+);
+
+
+
+/*
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code_transaction` varchar(50) DEFAULT NULL,
+  `idgiftcard` int(11) DEFAULT NULL,
+  `type` char(1) DEFAULT NULL COMMENT '1 charge , 2 buy',
+  `charge` decimal(10,2) DEFAULT NULL,
+  `client` int(11) DEFAULT NULL,
+  `status` char(1) DEFAULT '0' COMMENT '0 generado 1 pagado , 2 rechazado ',
+  `message_transaction` varchar(400) DEFAULT NULL,
+  `auth_code` varchar(50) DEFAULT NULL,
+  `card_type` varchar(20) DEFAULT NULL,
+  `account_number` varchar(20) DEFAULT NULL,
+  `text_post` text DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `user` int(11) DEFAULT NULL,
+  `state`*/
+    $query = db_select('transaction', 't');
+
+    $query->fields('t', array('id', 'code_transaction','type','charge' , 'client' ,"status", 'message_transaction', 'auth_code', 'card_type','account_number','created','state'));
+    // $query->fields('g', array('code', 'balance_value'));
+    $query->fields('u', array('name'));
+    $query->addField("g","id","giftid");
+    $query->addField("g","code","code");
+    $query->leftjoin("users" , "u" , "u.uid = t.client");
+    $query->leftjoin("giftcard" , "g" , "g.id = t.idgiftcard");
+    // $query->orderBy("o.created","DESC");
+    // dsm($_SESSION["giftcard"]["transaction"]);
+    if ($_SESSION["giftcard"]["transaction"]["status"] != "all") {
+         // dsm("hola");
+          $query->condition('t.status',  $_SESSION["giftcard"]["transaction"]["status"] , '=');
+    }    
+
+    $table_sort = $query->extend('TableSort') // Add table sort extender.
+                        ->orderByHeader($header); // Add order by headers.
+    
+    $pager = $table_sort->extend('PagerDefault')
+                        ->limit(25); // 5 rows per page.
+    // dsm($form_state);
+             
+
+
+    $result = $pager->execute();        
+
+    $rows = array();
+
+    foreach($result as $res){
+      // dsm($res->status);
+      if($res->status == 0){
+        $status = "On Request";
+      }elseif($res->status == 1){
+        $status = "Paid";
+      }else{
+        $status = "Rejected";
+      }
+
+      switch ($res->type) {
+        case '1':
+          $type = "Charge";
+          break;
+        case '2':
+          $type = "Buy";
+          break;
+          
+      }
+      switch ($res->state) {
+        case '0':
+          $state = "Not publish";
+          break;
+        case '1':
+          $state = "Publish";
+          break;
+          
+      }
+      $rows[$res->id] = array($res->id, 
+                              $res->code_transaction,
+                              $res->code . "-" . $res->giftid, 
+                              $type ,
+                              $res->charge,
+                              $res->name,
+                              $status,
+                              $res->message_transaction , 
+                              $res->auth_code , 
+                              $res->card_type , 
+                              $res->account_number , 
+                              $res->created , 
+                              $state , 
+                              _giftcard_transaction_generate_options($res->id));
+
+    }
+
+
+$form['table'] = array(
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => $rows,
+      '#empty' => t('Empty Rows')
+      );
+
+$form['pager'] = array('#markup' => theme('pager'));
+
+return $form;
+}
+
+function giftcard_list_transaction_form_submit($form, &$form_state) {
+// dsm("hola");
+   $_SESSION["giftcard"]["transaction"]["status"] = $form_state['values']['status'];   
+   $form_state['rebuild'] = TRUE;
+
+
+}
+
+
+function giftcard_list_transaction_edit_form(){
+
+$tranid = arg(4);
+$rs = db_query("SELECT t.status , t.charge ,CONCAT_WS('-',g.code,g.id) codefull , u.name , t.created
+  ,IFNULL(t.code_transaction,'') code_transaction
+  ,IFNULL(t.auth_code,'') auth_code
+  FROM transaction t 
+  left join giftcard g on g.id = t.idgiftcard
+  left join users u  on u.uid = t.client
+  where t.id=".$tranid);
+$tran = $rs->fetchObject();
+
+$html = <<<EOD
+<div><span style="font-weight:bold">Giftcard: </span>{$tran->codefull}</div>
+<div><span style="font-weight:bold">Charge: </span>{$tran->charge}</div>
+<div><span style="font-weight:bold">Client: </span>{$tran->name}</div>
+<div><span style="font-weight:bold">Created: </span>{$tran->created}</div>
+
+EOD;
+
+
+  $form['hmtl'] = array('#markup' => $html);
+
+
+$form['tranid'] = array(
+    '#type' => 'hidden',
+    '#value' => $tranid,
+  );
+
+
+
+$form['code_transaction'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Code transaction:'),
+    // '#required' => TRUE,
+    '#default_value'=>$tran->code_transaction,
+  );
+
+$form['auth_code'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Authorize code:'),
+    // '#required' => TRUE,
+    '#default_value'=>$tran->auth_code,
+  );
+
+
+
+$form['filter']['status'] = array(
+  '#type' => 'select',
+  '#title' => t('Status'),
+  '#options' => array(
+          // "all" => t('all'),
+          0 => t('On Request'),
+          1 => t('Paid'),
+          2 => t('Rejected'),
+       ),
+  '#default_value'=>$tran->status,
+);
+
+$form['message_transaction'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Message Transaction:'),
+    '#required' => TRUE,
+    // '#default_value'=>0
+  );
+  // Adds a simple submit button that refreshes the form and clears its contents -- this is the default behavior for forms.
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+
+return $form;
+}
+
+function giftcard_list_transaction_edit_form_validate($form, &$form_state){
+   $values = $form_state['values'];
+   $tranid = $form_state['values']['tranid'];
+   $rs = db_query("SELECT t.status , t.type,t.charge ,CONCAT_WS('-',g.code,g.id) codefull , u.name , t.created, g.id giftid 
+  FROM transaction t 
+  left join giftcard g on g.id = t.idgiftcard
+  left join users u  on u.uid = t.client
+  where t.id=".$tranid);
+$tran = $rs->fetchObject();
+  //NO SE PUEDE REACTUALIZAR UN PEDIDO YA ENTREGADO
+  if($values["status"] ==  $tran->status){
+    form_set_error('warning', 'Please , Change the status before  updating');
+  }elseif($values["status"] == 0){
+    form_set_error('warning', 'Please , Cannot back down to on request');
+
+  } 
+} 
+
+function giftcard_list_transaction_edit_form_submit($form, &$form_state) {
+
+
+$tranid = $form_state['values']['tranid'];
+$code_transaction = $form_state['values']['code_transaction'];
+$auth_code = $form_state['values']['auth_code'];
+$status = $form_state['values']['status'];
+$message_transaction = $form_state['values']['message_transaction'];
+//update trasaction
+$rs  = db_query("UPDATE transaction set 
+                  code_transaction = $code_transaction ,
+                  auth_code = $auth_code , 
+                  status = $status ,
+                  message_transaction = '$message_transaction' 
+                  where id = $tranid");
+
+// $tranid = arg(4);
+$rs = db_query("SELECT  t.status , t.type,t.charge ,CONCAT_WS('-',g.code,g.id) codefull , u.name , t.created, g.id giftid 
+  FROM transaction t 
+  left join giftcard g on g.id = t.idgiftcard
+  left join users u  on u.uid = t.client
+  where t.id=".$tranid);
+$tran = $rs->fetchObject();
+
+//actualizacion por tipo de status
+if($status == 1) {
+  // Registro de pago aceptado , se aumenta charge 
+  giftcard_register_detail(
+    $idgiftcard = $tran->giftid, 
+    $type  = $tran->type, 
+    $description = 'Update transaction manually' , 
+    $charge = $tran->charge , 
+    $idorder  = 0 , 
+    $idtransaction = $tranid  );
+
+db_query("UPDATE giftcard set balance_value = balance_value + ".$tran->charge." where id = ".$tran->giftid);
+
+
+}elseif($status == 2){
+ // si es rechazado
+ // busca si existe agregacion de monto  , si existio disminuirlo
+$rs  = db_query("SELECT * FROM giftcard_detail where state  = 1 and idtransaction=".$tranid );
+$row = $rs->fetchObject();
+
+if(!empty($row)){
+  // disminuyo el balance del giftcard
+  db_query("UPDATE giftcard set balance_value = balance_value - ".$row->charge." where id = ".$row->idgiftcard);
+  //actualizo el detalle
+  db_query("UPDATE giftcard_detail set state = 0 where id = ".$row->id);
+  //agrego nuevo detalle
+  giftcard_register_detail(
+    $idgiftcard = $row->idgiftcard, 
+    $type  = 3, 
+    $description = 'Pass status transacction to Reject' , 
+    $charge = $row->charge , 
+    $idorder  = 0 , 
+    $idtransaction = $tranid  );
+}
+
+
+}elseif($status == 0){
+  // Pasar a pendiente
+}
 
 
 
 
+ drupal_set_message(t("The Transaction has been updated."), 'status', FALSE);
+ drupal_goto("admin/giftcard/transaction");
+ 
+}
 
 
 
