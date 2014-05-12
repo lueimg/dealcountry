@@ -250,6 +250,18 @@ $items['myaccount/addfunds/payment/receipt'] = array(
     'type' =>  MENU_CALLBACK,
     // 'type' => MENU_DEFAULT_LOCAL_TASK,
   );
+
+$items['myaccount/fundsreceipt'] = array( 
+    'title' => t(''), 
+    'description' => '', 
+     'page callback' => 'giftcard_validacion_pago',
+    // 'page arguments' => array('giftcard_order_form'),
+    'access arguments' => array('access content'),
+    'type' =>  MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+
 $items['applicabletaxes'] = array( 
     'title' => t(''), 
     'description' => '', 
@@ -259,6 +271,19 @@ $items['applicabletaxes'] = array(
     'type' =>  MENU_CALLBACK,
     // 'type' => MENU_DEFAULT_LOCAL_TASK,
   );
+
+
+$items['myaccount/e-giftcard'] = array( 
+    'title' => t('Send e-Gift Card'), 
+    'description' => '', 
+  //  'page callback' => 'giftcard_page_send_egiftcard',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('giftcard_page_send_egiftcard_form'),
+    'access arguments' => array('access content'),
+    'type' =>  MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
   return $items; 
 }
  
@@ -1645,7 +1670,7 @@ $html= <<<EOD
 <INPUT TYPE=HIDDEN NAME="x_cust_id" VALUE="{$user->uid}">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_method" VALUE="POST">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_text" VALUE="Click here to return to our home page">
-<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="http://hispaneros.com/myaccount/addfunds/payment/receipt">
+<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="http://dealcountry.dev/myaccount/fundsreceipt">
 <input type='submit' value="Click here for the secure payment form">
 </form>
 EOD;
@@ -3202,5 +3227,171 @@ if(!empty($row)){
 }
 
 
+function giftcard_page_send_egiftcard_form($node, &$form_state){
+
+  global $user; 
+/*
+$form['code'] = array(
+          '#type' => 'select',
+          '#title' => t('Select your giftcard:'),
+          '#options' => giftcard_mygiftcard_options($user->uid),
+          '#attributes' => array('class'=>array('part1')),
+        );*/
+$form['filter'] = array(
+  '#type' => 'fieldset',
+  '#collapsible' => false,
+  '#collapsed' => FALSE,
+  '#title' => t('Recipient Info:')
+);
+
+$form['filter']['name'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Name:'),
+          '#required' => TRUE,
+          '#default_value'=>"",
+          //'#attributes' => array('class'=>array('part2'),'placeholder'=>array('..-.......-....')),
+
+        );
+$form['filter']['email'] = array(
+          '#type' => 'textfield',
+          '#title' => t('E-mail:'),
+          '#required' => TRUE,
+          // '#default_value'=>"5.00",
+          //'#attributes' => array('class'=>array('part3'),'placeholder'=>array('$5.00 is the minimum charge required')),
+
+        );
+
+$form['filter']['cards'] = array(
+  '#type' => 'radios',
+  '#title' => t('Cards:'),
+  '#required' => TRUE,
+  '#options' => array(
+          1 => t('happy'),
+          2 => t('Aniversary'),
+          3 => t('I am love'),
+          4 => t('I am love2'),
+          5 => t('I am love3'),
+       ),
+);
+
+$form['cant'] = array(
+  '#type' => 'fieldset',
+  '#collapsible' => false,
+  '#collapsed' => FALSE,
+  '#title' => t('Select the amount:')
+);
+
+$form['cant']['amount'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Amount:'),
+          '#required' => TRUE,
+          // '#default_value'=>"5.00",
+          '#attributes' => array('class'=>array(''),'placeholder'=>array('$5.00 is the minimum charge required')),
+
+        );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Go to Payment Gateway',
+  );
+
+  return $form;
+
+}
+function giftcard_page_send_egiftcard_form_validate($form, &$form_state){
+
+$mail = $form_state['values']['email'];
+  if (!valid_email_address($mail)) {
+    form_set_error('email', t('The email address appears to be invalid.'));
+  }
+
+   $value = $form_state['values']['amount'];
+  if (empty($value) || !is_numeric($value)) {
+    form_set_error('amount', "Field Amount: Only numbers please.");
+  }
+
+}
+
+function giftcard_page_send_egiftcard_form_submit($form, &$form_state){
 
 
+
+global $user;
+// GENERAR INVOICEORDER
+$idtransaction = db_insert('transaction') // Table name no longer needs {}
+          ->fields(array(
+            'idgiftcard' => '',
+            'type' => 2, //It is a buy egiftcard 
+            'charge' => $form_state["values"]['amount'],
+            'client' => $user->uid,
+            'created' => date('Y-m-d H:i:s'),
+            'user' => $user->uid,
+          ))
+          ->execute();
+
+$_SESSION['transaction'] = $form_state["values"];
+$_SESSION['transaction']["invoice"] = $idtransaction;
+$_SESSION['transaction']["type"] = "buy egiftcard";
+
+drupal_goto("myaccount/addfunds/payment");
+
+
+
+
+}
+
+function giftcard_page_send_egiftcard_receipt(){
+
+}
+
+function giftcard_authorizenet_senddata(){
+
+require_once 'anet_php_sdk/AuthorizeNet.php'; // Include the SDK you downloaded in Step 2
+$api_login_id = '3LunE32TE4';
+$transaction_key = '977n9uYxMk866Uev';
+$amount = $_SESSION['transaction']['amount'];
+$fp_timestamp = time();
+$fp_sequence = $_SESSION['transaction']['invoice'];// Enter an invoice or other unique number.
+$fingerprint = AuthorizeNetSIM_Form::getFingerprint($api_login_id,
+  $transaction_key, $amount, $fp_sequence, $fp_timestamp);
+global $user;
+
+$html= <<<EOD
+
+<form method='post' action="https://secure.authorize.net/gateway/transact.dll">
+<input type='hidden' name="x_login" value="{$api_login_id}" />
+<input type='hidden' name="x_fp_hash" value="{$fingerprint}" />
+<input type='hidden' name="x_amount" value="{$amount}" />
+<input type='hidden' name="x_fp_timestamp" value="{$fp_timestamp}" />
+<input type='hidden' name="x_fp_sequence" value="{$fp_sequence}" />
+<input type='hidden' name="x_invoice_num" value="{$fp_sequence}" />
+<INPUT TYPE=HIDDEN NAME="x_description" VALUE="Product or order description.">
+<input type='hidden' name="x_version" value="3.1">
+<input type='hidden' name="x_method" value="cc">
+<input type='hidden' name="x_show_form" value="payment_form">
+<input type='hidden' name="x_test_request" value="true" />
+<INPUT TYPE=HIDDEN NAME="x_cust_id" VALUE="{$user->uid}">
+<INPUT TYPE=HIDDEN NAME="x_receipt_link_method" VALUE="POST">
+<INPUT TYPE=HIDDEN NAME="x_receipt_link_text" VALUE="Click here to return to our home page">
+<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="http://dealcountry.dev/myaccount/fundsreceipt">
+<input type='submit' value="Click here for the secure payment form">
+</form>
+EOD;
+
+unset($_SESSION['formvalues']);
+return $html;
+
+}
+
+function giftcard_validacion_pago(){
+//VALIDAR VALID INFORMATION OF AUTHORIZE NET
+
+// VALIDATE TRNSACTION RESPONSE
+
+// VALIDATE MESSAGE TO SHOW  
+
+
+
+
+  
+}
