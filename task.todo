@@ -49,7 +49,6 @@ My account:
   ✔ Listado de pedidos de un usuario :: estilos @done (14-04-24 14:53)
   ✔ Recarga Gift Card @done (14-05-01 07:03)
   ✔ Registrar Gift Card :: Falta opcion del menu @done (14-05-03 12:50)
-  ☐ E-giftCard
   ☐ My purchase , add details del pedido
 
 Compra:
@@ -59,19 +58,13 @@ Compra:
   ✔ Estilizar tipos de mensajes @done (14-05-03 12:50)
   ✔ Oferta agregar boton add funds @done (14-05-03 12:51)
   ✔ Enviar Pedido por email @done (14-05-11 17:30)
-  ☐ Giftcard Code : mostrar existentes con monto para usar.
-  ☐ Usar 2 giftcard en una solo compra
 Ofert:
   ✔ Agregar Boton add fonds @done (14-05-05 01:39)
 
-Crons:
-  ☐ Expiracion de giftcard
-  ☐ Reduccion de charge service fee
 Frontend:
   ✔ Menu Cabecera @done (14-05-07 16:48)
   ✔ Menu Giftcard @done (14-05-11 17:30)
 Ronda de cambios:
-  ☐ Envio de emails por compras.
    En My Purchases:
  ✔ 1. Cambiar Data por Date. Cambiar Payed for Paid. @done (14-05-11 12:30)
  ✔ 2. Eliminar Estatus de esta pantalla front end. @done (14-05-11 12:30)
@@ -82,11 +75,10 @@ Ronda de cambios:
  ✔ Darle el doble de altura a la franja gris @done (14-05-11 13:05)
  ✔ Usar el mismo font del titulo del deal en estos datos. Dale los mismos tamaños al lable y al dato. En general que se vea mejor. @done (14-05-11 13:08)
  Spot:  
- ☐ Luis, se puede modificar el payment form de Authorize?
  ✔ Please remove Activation Date field visible to customer in My Gift Cards. @done (14-05-11 13:11)
  ✔  te paso la nueva imagen adjunta. del giftcard sin 30 @done (14-05-11 13:33)
+  ✔ Envio de emails por compras. @done (14-05-12 02:35)
  ✔  Please ensure all numerical amounts are preceding the dollar sign. @done (14-05-11 13:42)
- ☐ Please review the document I sent you and refer to the exact wording approve for this Module.
  ✔ Luis, ponle a todos los botones el rojo del menu. @done (14-05-11 13:48)
  
  Cambio de Mensajes luego de acciones:
@@ -107,13 +99,24 @@ Your Order has been registered , Please visit your orders in your Account – ca
  ✔ "Your order has been accepted. Please visit your Account to view your purchases." @done (14-05-11 13:59)
 
 
- ☐ Otra: We noticed the word Buytopia is below the Terms and Conditions disclaimer (Seepoint 3)- Please ensure it is removed. 
 Luis, esto tambien lo note. El nombre de la cuponera a la que pertenece la oferta se muestra abajo, al final de todo el formulario de compra. Ahora no lo puedo replicar para mandarte un screen, pero lo vi varias veces en los dias entariores.
 
 
 
 
 
+Crons:
+  ☐ Expiracion de giftcard
+  ☐ Reduccion de charge service fee
+
+
+ ☐ Luis, se puede modificar el payment form de Authorize?
+  ☐ Giftcard Code : mostrar existentes con monto para usar.
+  ☐ Usar 2 giftcard en una solo compra
+ ☐ Otra: We noticed the word Buytopia is below the Terms and Conditions disclaimer (Seepoint 3)- Please ensure it is removed. 
+ ☐ Please review the document I sent you and refer to the exact wording approve for this Module.
+   
+  ☐ E-giftCard
 
 
 

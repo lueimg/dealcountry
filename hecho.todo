@@ -5,3 +5,4 @@ Cambios a realizar en produccion :
   ☐ agregar path giftcard al contexto http://dealcountry.dev/admin/structure/context/list/deals-list/edit
   ☐  agregar context a menu myaccount http://dealcountry.dev/admin/structure/context/list/myaccount/edit
   ☐ crear menu my account
+  ☐ Instalar modulo mimehtml

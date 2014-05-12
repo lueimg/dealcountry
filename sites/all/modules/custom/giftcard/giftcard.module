@@ -1171,24 +1171,25 @@ $offer =  $view->preview('default', $args);
 //ENVIO DE EMAILS
 $body = <<<EOD
 <div>
-<div class="data"><span style="font-weight:bold">Giftcard Number: </span>{$values["giftcard"]}</div>
-<div class="data"><span style="font-weight:bold">Name : </span>{$values['name']}</div>
-<div class="data"><span style="font-weight:bold">Last Name : </span>{$values['lastname']}</div>
-<div class="data"><span style="font-weight:bold">Email Address : </span>{$values['mail']}</div>
-<div class="data"><span style="font-weight:bold">Telephone Number : </span>{$values['telephone']}</div>
-<div class="data"><span style="font-weight:bold">Shipping Address : </span>{$values['address']}</div>
-<div class="data"><span style="font-weight:bold">Suite/Apt. : </span>{$values['suite']}</div>
-<div class="data"><span style="font-weight:bold">city : </span>{$values['city']}</div>
-<div class="data"><span style="font-weight:bold">Postal code : </span>{$values['postalcode']}</div>
-<div class="data"><span style="font-weight:bold">Order details : </span>{$values['orderdetail']}</div>
-<div class="data"><span style="font-weight:bold">Product Name : </span>{$node->title}</div>
+<div class="data"><span style="font-weight:bold">Giftcard Number: </span>{$values["giftcard"]}<br></div>
+<div class="data"><span style="font-weight:bold">Name : </span>{$values['name']}<br></div>
+<div class="data"><span style="font-weight:bold">Last Name : </span>{$values['lastname']}<br></div>
+<div class="data"><span style="font-weight:bold">Email Address : </span>{$values['mail']}<br></div>
+<div class="data"><span style="font-weight:bold">Telephone Number : </span>{$values['telephone']}<br></div>
+<div class="data"><span style="font-weight:bold">Shipping Address : </span>{$values['address']}<br></div>
+<div class="data"><span style="font-weight:bold">Suite/Apt. : </span>{$values['suite']}<br></div>
+<div class="data"><span style="font-weight:bold">city : </span>{$values['city']}<br></div>
+<div class="data"><span style="font-weight:bold">Postal code : </span>{$values['postalcode']}<br></div>
+<div class="data"><span style="font-weight:bold">Order details : </span>{$values['orderdetail']}<br></div>
+<div class="data"><span style="font-weight:bold">Product Name : </span>{$node->title}<br></div>
 <div class="data"><span style="font-weight:bold">Product Url : </span><a href="http://dealcountry.dev/node/{$node->nid}">http://dealcountry.dev/node/{$node->nid}</a></div>
 </div>
 EOD;
 
     $params = array(
-    'subject' => 'DealCountry : Buy with Giftcard',
+    'subject' => 'DealCountry : Buy with Giftcard '.$values["giftcard"],
     'body' => $body,
+    'gifcard'=>$values["giftcard"],
     );
   giftcard_send_mail($params);
 
@@ -2745,7 +2746,11 @@ function giftcard_mail($key, &$message, $params) {
 
 
   $message['subject'] = $params['subject'];
-  $message['body'] = $params['body'];
+  $message['body'] = array();
+  $message['body'][] = $params['body'];
+  // $message['subject'] = t("@feed  confirmation", $params);
+  // //$message['body'][] = t("Hello", $params);
+  // $message['body'][] = t("Se importo el feed (@feed).", $params);
 }
 
 
@@ -2754,18 +2759,6 @@ function giftcard_send_mail($params){
     $to = variable_get('giftcard_mail', 'luismori@gmail.com');
     $from = 'noreply@dealcountry.com';
   
-    // $params = array(
-    // 'body' => $body,
-    // 'subject' => 'Website Information Request',
-    // );
-
-    // if (drupal_mail('giftcard', 'orders', $to, language_default(), $params, $from, TRUE))
-    // {
-    //     drupal_set_message('Thanks, we will be in contact with more information soon.');
-    // } else {
-    //     drupal_set_message('There was an error subscribing you. Please try again later');
-    // }
-
     drupal_mail('giftcard', 'orders', $to, language_default(), $params, $from, TRUE);
 
 }
