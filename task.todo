@@ -2,8 +2,8 @@ Actividades:
   ✔ Crear permisos para administracion de gift card @done (14-04-21 04:48)
   ✔ Cambiar boton que redirecciona a la pagina checkout @done (14-04-21 04:50)
   ✔ Insertar Pedido @done (14-04-21 10:44) 
-Previos : 
  ✔ Cambiar paginador de listados @done (14-05-01 13:58)
+Previos : 
 
 Administer:
   Giftcard:
@@ -12,13 +12,13 @@ Administer:
     ✔ Ver detalle @done (14-04-24 07:18)
     ✔ Cambiar codigo  , el correlativo pertence al id generado @done (14-04-28 01:43)
     ✔ filtros activo e inactivo @done (14-04-28 03:01)
-    ☐ admin giftcard : Crear giftcar manual (codigo existente)
-    ☐ Importar y exportar
-    ☐ Generar codigos en batch
     ✔ Revisar disminucion de Balance @done (14-05-07 16:43)
+    ☐ admin giftcard : Crear giftcard manual (codigo existente , solo se creara e-giftcard)
+    ✔ Importar y exportar @done (14-05-11 17:21)
+    ✔ Generar codigos en batch @done (14-05-11 16:12)
     Acciones en masa:
-      ☐ Activar varios
-      ☐ Agregar saldo a un rango de gitftcards
+      ✔ Activar varios @done (14-05-11 17:53)
+      ✔ Agregar saldo a un rango de gitftcards @done (14-05-11 18:38)
 
 
   Pedido:  
@@ -57,9 +57,10 @@ Compra:
   ✔ page checkout :: estilizar @done (14-04-24 14:49)
   ✔ Link click here for shipping and taxes fee , abre colorbox con link a add funds @done (14-05-03 12:50)
   ✔ Estilizar tipos de mensajes @done (14-05-03 12:50)
-  ☐ Enviar Pedido por email
-  ☐ Giftcard Code : mostrar existentes con monto para usar.
   ✔ Oferta agregar boton add funds @done (14-05-03 12:51)
+  ✔ Enviar Pedido por email @done (14-05-11 17:30)
+  ☐ Giftcard Code : mostrar existentes con monto para usar.
+  ☐ Usar 2 giftcard en una solo compra
 Ofert:
   ✔ Agregar Boton add fonds @done (14-05-05 01:39)
 
@@ -68,7 +69,54 @@ Crons:
   ☐ Reduccion de charge service fee
 Frontend:
   ✔ Menu Cabecera @done (14-05-07 16:48)
-  ☐ Menu Giftcard
+  ✔ Menu Giftcard @done (14-05-11 17:30)
+Ronda de cambios:
+  ☐ Envio de emails por compras.
+   En My Purchases:
+ ✔ 1. Cambiar Data por Date. Cambiar Payed for Paid. @done (14-05-11 12:30)
+ ✔ 2. Eliminar Estatus de esta pantalla front end. @done (14-05-11 12:30)
+ ✔ 3. En el sistema cambiar en todo el systema el Status Pending por On Request (Usa estos estatus que mando originalmente el cliente: Active-On Request-Expired) @done (14-05-11 12:45)
+3. Mejorar el diseño del cuadro de My Purchases:
+ ✔ Eliminar Status @done (14-05-11 12:44)
+ ✔ No bold a los otros dos textos rojos @done (14-05-11 12:54)
+ ✔ Darle el doble de altura a la franja gris @done (14-05-11 13:05)
+ ✔ Usar el mismo font del titulo del deal en estos datos. Dale los mismos tamaños al lable y al dato. En general que se vea mejor. @done (14-05-11 13:08)
+ Spot:  
+ ☐ Luis, se puede modificar el payment form de Authorize?
+ ✔ Please remove Activation Date field visible to customer in My Gift Cards. @done (14-05-11 13:11)
+ ✔  te paso la nueva imagen adjunta. del giftcard sin 30 @done (14-05-11 13:33)
+ ✔  Please ensure all numerical amounts are preceding the dollar sign. @done (14-05-11 13:42)
+ ☐ Please review the document I sent you and refer to the exact wording approve for this Module.
+ ✔ Luis, ponle a todos los botones el rojo del menu. @done (14-05-11 13:48)
+ 
+ Cambio de Mensajes luego de acciones:
+ ✔ 1. Cuando registra un pago: cambiar your pay has been registered to "Your payment has been accepted" @done (14-05-11 13:52)
+
+2. Cuando Gift Card no tiene suficientes fondos:
+ ✔ The value of the deal selected exceeds the value of your gift card. Please add funds to your gift card. @done (14-05-11 13:57)
+Your gift card balance is $.............................
+
+3. In Buying with Gift Card Form when funds are ok:
+ ✔ Click here for shipping fees and taxes @done (14-05-11 14:00)
+
+4. Disclosure on Gift Card form must read:
+ ✔ Please read and agree to the disclosure below by checking the box @done (14-05-11 14:01)
+
+5. Luego de compra aprobada:
+Your Order has been registered , Please visit your orders in your Account – cambiar por:
+ ✔ "Your order has been accepted. Please visit your Account to view your purchases." @done (14-05-11 13:59)
+
+
+ ☐ Otra: We noticed the word Buytopia is below the Terms and Conditions disclaimer (Seepoint 3)- Please ensure it is removed. 
+Luis, esto tambien lo note. El nombre de la cuponera a la que pertenece la oferta se muestra abajo, al final de todo el formulario de compra. Ahora no lo puedo replicar para mandarte un screen, pero lo vi varias veces en los dias entariores.
+
+
+
+
+
+
+
+
 
 
 

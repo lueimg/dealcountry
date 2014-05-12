@@ -217,8 +217,8 @@ $databases = array (
     array (
       'database' => 'dealcountry',
       'username' => 'root',
-      'password' => '123',
-      'host' => 'localhost',
+      'password' => '',
+      'host' => '127.0.0.1',
       'port' => '',
       'driver' => 'mysql',
       'prefix' => '',
