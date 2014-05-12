@@ -1645,7 +1645,7 @@ $html= <<<EOD
 <INPUT TYPE=HIDDEN NAME="x_cust_id" VALUE="{$user->uid}">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_method" VALUE="POST">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_text" VALUE="Click here to return to our home page">
-<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="http://hispanero.com/myaccount/addfunds/payment/receipt">
+<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="http://hispaneros.com/myaccount/addfunds/payment/receipt">
 <input type='submit' value="Click here for the secure payment form">
 </form>
 EOD;
