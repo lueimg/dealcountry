@@ -251,10 +251,19 @@ $items['myaccount/addfunds/payment/receipt'] = array(
     // 'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
+$items['myaccount/fundssend'] = array( 
+    'title' => t(''), 
+    'description' => '', 
+     'page callback' => 'giftcard_authorizenet_senddata',
+    // 'page arguments' => array('giftcard_order_form'),
+    'access arguments' => array('access content'),
+    'type' =>  MENU_CALLBACK,
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
 $items['myaccount/fundsreceipt'] = array( 
     'title' => t(''), 
     'description' => '', 
-     'page callback' => 'giftcard_validacion_pago',
+     'page callback' => 'giftcard_authorizenet_receipt',
     // 'page arguments' => array('giftcard_order_form'),
     'access arguments' => array('access content'),
     'type' =>  MENU_CALLBACK,
@@ -2607,6 +2616,7 @@ giftcard_register_detail($row->idgiftcard , $type = 2 , $description = 'Add fund
 drupal_set_message(t("Your pay has been accepted."), 'status', FALSE);
 drupal_goto("myaccount");
 return "";
+
 }
 
 
@@ -3230,13 +3240,7 @@ if(!empty($row)){
 function giftcard_page_send_egiftcard_form($node, &$form_state){
 
   global $user; 
-/*
-$form['code'] = array(
-          '#type' => 'select',
-          '#title' => t('Select your giftcard:'),
-          '#options' => giftcard_mygiftcard_options($user->uid),
-          '#attributes' => array('class'=>array('part1')),
-        );*/
+
 $form['filter'] = array(
   '#type' => 'fieldset',
   '#collapsible' => false,
@@ -3320,7 +3324,7 @@ global $user;
 // GENERAR INVOICEORDER
 $idtransaction = db_insert('transaction') // Table name no longer needs {}
           ->fields(array(
-            'idgiftcard' => '',
+            'idgiftcard' => 0,
             'type' => 2, //It is a buy egiftcard 
             'charge' => $form_state["values"]['amount'],
             'client' => $user->uid,
@@ -3329,11 +3333,26 @@ $idtransaction = db_insert('transaction') // Table name no longer needs {}
           ))
           ->execute();
 
+
+$idegift = db_insert('egiftcard') // Table name no longer needs {}
+          ->fields(array(
+            'name' => $form_state["values"]['name'],
+            'email' => $form_state["values"]['email'], //It is a buy egiftcard 
+            'amount' => $form_state["values"]['amount'],
+            'idtransaction' => $idtransaction,
+            'idgiftcard' => 0,
+            'status' => 0,
+            'created' => date('Y-m-d H:i:s'),
+            'user' => $user->uid,
+          ))
+          ->execute();
+
+
 $_SESSION['transaction'] = $form_state["values"];
 $_SESSION['transaction']["invoice"] = $idtransaction;
 $_SESSION['transaction']["type"] = "buy egiftcard";
 
-drupal_goto("myaccount/addfunds/payment");
+drupal_goto("myaccount/fundssend");
 
 
 
@@ -3345,6 +3364,10 @@ function giftcard_page_send_egiftcard_receipt(){
 }
 
 function giftcard_authorizenet_senddata(){
+
+if(empty($_SESSION['transaction']))
+  exit();
+
 
 require_once 'anet_php_sdk/AuthorizeNet.php'; // Include the SDK you downloaded in Step 2
 $api_login_id = '3LunE32TE4';
@@ -3378,43 +3401,173 @@ $html= <<<EOD
 </form>
 EOD;
 
-unset($_SESSION['formvalues']);
+unset($_SESSION['transaction']);
 return $html;
 
 }
 
-function giftcard_validacion_pago(){
+// function giftcard_validacion_pago(){
+function giftcard_authorizenet_receipt(){
 //VALIDAR VALID INFORMATION OF AUTHORIZE NET
 
 // VALIDATE TRNSACTION RESPONSE
 
 // VALIDATE MESSAGE TO SHOW  
 
+//VALIDAR TRANSACCION YA REGISTRADA
 
+
+global $user;
+
+   $data = $_POST;
+   $datajson = json_encode($data);
+
+
+$num_updated = db_update('transaction') // Table name no longer needs {}
+  ->fields(array(
+     'code_transaction' => $data['x_trans_id'],
+     'status' => $data['x_response_code'],
+     'message_transaction' => $data['x_response_reason_text'],
+     'auth_code' => $data['x_auth_code'],
+     'card_type' => $data['x_card_type'],
+     'account_number' => $data['x_account_number'],
+     'code_transaction' => $data['x_trans_id'],
+     'text_post' => $datajson,
+  ))
+  ->condition('id',$data['x_invoice_num'], '=')
+  ->execute();
+
+// UPDATE BALANCE IN GIFRCARD AND DETAILS
+$sql = "select * from transaction where id =".$data['x_invoice_num'];
+$rs = db_query($sql);
+$row = $rs->fetchObject();
+
+
+// SI ES UNA RECARGAR
+if($row->type == 1){
+
+  db_query("update giftcard set balance_value = balance_value + ".$data['x_amount']." where id = ".$row->idgiftcard);
+  giftcard_register_detail($row->idgiftcard , $type = 2 , $description = 'Add funds' , $data['x_amount'] , $idorder  = 0 , $data['x_invoice_num']  );     
+  
+}else{
+//si es una compra
+$prefix = "EG";
+$service_fee = 0;
+//se crea giftcard
+$code = strtoupper($prefix)."-" .rand(100000,999999);
+$idgiftcard = db_insert('giftcard') // Table name no longer needs {}
+          ->fields(array(
+            'code' => $code,
+            'original_value' => $row->charge,
+            'balance_value' => $row->charge,
+            'start_date' => date("Y-m-d"),
+            // 'end_date' => '',
+            'service_fee' => $service_fee,
+            'status' => 1,
+            'created' => date('Y-m-d H:i:s'),
+            'user' => $user->uid,
+            'observation' => 'e-giftcard created',
+          ))
+          ->execute();
+//SE CREA DETALLE DE CRECION DE E-GIFTCARD
+$nid = db_insert('giftcard_detail') // Table name no longer needs {}
+          ->fields(array(
+            'idgiftcard' => $idgiftcard,
+            'type' => 6, // 6 compra ( 1 uso ,2 regarga ,3 disminucion , 4  expiracion, 5 taxes o shipping ,6 compra)
+            'concept' => "Buy e-Gift card",
+            'charge' => $row->charge,
+            'idorder' => 0,
+            'idtransaction' => $data['x_invoice_num'],
+            'state' => 1,
+            'created' => date('Y-m-d H:i:s'),
+            'user' => $user->uid,
+          ))
+          ->execute();
+
+// se actualiza transaction y egiftcards
+db_update('transaction') // Table name no longer needs {}
+  ->fields(array(
+     'idgiftcard' => $idgiftcard,
+  ))
+  ->condition('id',$data['x_invoice_num'], '=')
+  ->execute();
+
+db_update('egiftcard') // Table name no longer needs {}
+  ->fields(array(
+     'idgiftcard' => $idgiftcard,
+     'status' => 1,
+     'updated' => date("Y-m-d_H:i:s"),
+  ))
+  ->condition('idtransaction',$data['x_invoice_num'], '=')
+  ->execute();
+
+
+//Envio de emails: comprador , amigo , dealcountry stuff 
+$sql = "select eg.email , eg.name   , g.code , g.id from egiftcard eg 
+left join giftcard g on g.id = eg.idgiftcard
+where eg.idtransaction =".$data['x_invoice_num'];
+$rs = db_query($sql);
+$eg = $rs->fetchObject();
+
+//Comprador 
+  $to = $user->mail;
+  $from = 'noreply@dealcountry.com';
+  $params = array(
+    'subject' => 'DealCountry : E-GIFTCARD PURCHASE',
+    'body' => "A E-Gift Card has been sent to ".$eg->name." email: ".$eg->email,
+    // 'gifcard'=>$values["giftcard"],
+    );
+  drupal_mail('giftcard', 'orders', $to, language_default(), $params, $from, TRUE);
+/********************/
+//Amigo 
+  $to = $eg->email;
+  $from = 'noreply@dealcountry.com';
+  $params = array(
+    'subject' => 'DealCountry : E-GIFTCARD for you',
+    'body' => "A E-Gift Card has been sent to you. Code ".$eg->code."-".$eg->id,
+    // 'gifcard'=>$values["giftcard"],
+    );
+  drupal_mail('giftcard', 'orders', $to, language_default(), $params, $from, TRUE);
+/********************/
+//stuff
+    $to = variable_get('giftcard_mail', 'luismori@gmail.com');
+    $from = 'noreply@dealcountry.com';
+    $params = array(
+    'subject' => 'DealCountry : E-GIFTCARD has been bought',
+    'body' => "A E-Gift Card has been bought. Code ".$eg->code."-".$eg->id,
+    // 'gifcard'=>$values["giftcard"],
+    );
+    drupal_mail('giftcard', 'orders', $to, language_default(), $params, $from, TRUE);
+
+
+}
+
+
+drupal_set_message(t("Your Pay has been accepted."), 'status', FALSE);
+drupal_goto("myaccount");
+return "";
 
 
 
 }
 
-/*
 
-CREATE TABLE `NewTable` (
-`id`  int(11) NOT NULL AUTO_INCREMENT ,
-`name`  varchar(300) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL ,
-`email`  varchar(300) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL ,
-`amount`  decimal(10,2) NULL DEFAULT NULL ,
-`idtransaction`  int(11) NULL DEFAULT NULL ,
-`idgiftcard`  int(11) NULL DEFAULT NULL ,
-`status`  char(1) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT '0' COMMENT '0 inactivo , 1 pagado , 2 anulado.' ,
-`created`  datetime NULL DEFAULT NULL ,
-`updated`  datetime NULL DEFAULT NULL ,
-`user`  int(11) NULL DEFAULT NULL ,
-PRIMARY KEY (`id`)
-)
-ENGINE=InnoDB
-DEFAULT CHARACTER SET=latin1 COLLATE=latin1_swedish_ci
-AUTO_INCREMENT=1
-ROW_FORMAT=COMPACT
-;
 
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
