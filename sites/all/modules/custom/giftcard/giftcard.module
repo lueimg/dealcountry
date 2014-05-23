@@ -507,7 +507,7 @@ $header = array(
              array('data' => t('Code'), 'field' => 'code'),
              array('data' => t('Original value'), 'field' => 'original_value'),
              array('data' => t('Balance value'), 'field' => 'balance_value'),
-             array('data' => t('BV without Pendents')),
+             array('data' => t('Balance value real')),
              array('data' => t('Client'), 'field' => 'client'),
              array('data' => t('Start Date'), 'field' => 'start_date'),
              array('data' => t('End Date'), 'field' => 'end_date'),
@@ -1872,7 +1872,7 @@ left join giftcard g on g.id = o.idgiftcard where o.id = $idorder");
   $page = "";
   $balance_contable = giftcard_balance_value_enable($order->idgiftcard);
   if($order->status == 1 )
-    $label_status = "Pendent";
+    $label_status = "On request";
   elseif($order->status == 2)
     $label_status = "Delivered";
   elseif($order->status == 3)
@@ -2026,7 +2026,7 @@ left join giftcard g on g.id = o.idgiftcard where o.id = $idorder");
   $page = "";
   $balance_contable = giftcard_balance_value_enable($order->idgiftcard);
   if($order->status == 1 )
-    $label_status = "Pendent";
+    $label_status = "On Request";
   elseif($order->status == 2 ){
     $label_status = "Delivered";
     drupal_set_message(t("this Purschase has already been Delivered ."), 'status', FALSE);
@@ -2243,7 +2243,7 @@ left join giftcard g on g.id = o.idgiftcard where o.id = $idorder");
   $page = "";
   $balance_contable = giftcard_balance_value_enable($order->idgiftcard);
   if($order->status == 1 )
-    $label_status = "Pendent";
+    $label_status = "On request";
   else
     $label_status = "Delivered";
 
@@ -2914,6 +2914,9 @@ if($form_state['clicked_button']["#value"] == "Cancel"){
 
 function giftcard_list_transaction_form($node, &$form_state){
 
+if(empty($_SESSION["giftcard"]["transaction"]["status"]))
+  $_SESSION["giftcard"]["transaction"]["status"] = "all";
+
 $header = array(
              array('data' => t('ID'), 'field' => 'id', 'sort' => 'desc'), // sort
              array('data' => t('Code transaction'), 'field' => 'code_transaction'),
@@ -3017,10 +3020,10 @@ $form['filter']['submit'] = array(
 
       switch ($res->type) {
         case '1':
-          $type = "Charge";
+          $type = "Funds Added";
           break;
         case '2':
-          $type = "Buy";
+          $type = "e-Gift Card";
           break;
           
       }
