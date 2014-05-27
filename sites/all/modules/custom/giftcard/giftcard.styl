@@ -282,6 +282,8 @@ gris_azulado = #E4E8F1
 			// background rojo
 
 .page-myaccount-e-giftcard
+	label[for=edit-message]
+		vertical-align top
 	fieldset
 		border none
 	legend.panel-heading
@@ -296,9 +298,11 @@ gris_azulado = #E4E8F1
 	.form-type-textfield
 		label
 		/ label[for=edit-cards]
+		/ .page-myaccount-e-giftcard label[for=edit-message]
 			display inline-block
 			width 15%
 			font-weight normal
+		/ .page-myaccount-e-giftcard .form-textarea-wrapper
 		input 
 			width 60%
 			display inline-block

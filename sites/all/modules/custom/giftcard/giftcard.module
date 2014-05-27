@@ -1380,7 +1380,6 @@ function giftcard_register_detail($idgiftcard , $type , $description = '' , $cha
 function giftcard_page_myaccount(){
 
 
-
 // global $user;
 // dsm($user);
 //LISTADO DE GIFTCARD
@@ -3318,12 +3317,20 @@ $form['filter']['email'] = array(
           //'#attributes' => array('class'=>array('part3'),'placeholder'=>array('$5.00 is the minimum charge required')),
 
         );
+$form['filter']['message'] = array(
+          '#type' => 'textarea',
+          '#title' => t('Message:'),
+          '#required' => TRUE,
+          '#default_value'=>"",
+          //'#attributes' => array('class'=>array('part2'),'placeholder'=>array('..-.......-....')),
+
+        );
 
 $form['filter']['cards'] = array(
   '#type' => 'radios',
   '#title' => t('Cards:'),
   '#required' => TRUE,
-  '#attributes'=>array('class'=>'cards'),
+  
   '#options' => array(
           1 => t('Thinking of you'),
           2 => t('Thinking about you'),
@@ -3397,6 +3404,8 @@ $idegift = db_insert('egiftcard') // Table name no longer needs {}
             'name' => $form_state["values"]['name'],
             'email' => $form_state["values"]['email'], //It is a buy egiftcard 
             'amount' => $form_state["values"]['amount'],
+            'message' => $form_state["values"]['message'],
+            'type' => $form_state["values"]['cards'],
             'idtransaction' => $idtransaction,
             'idgiftcard' => 0,
             'status' => 0,
@@ -3439,7 +3448,7 @@ global $user, $base_url;
 
 $html= <<<EOD
 <h3> Please , wait a moment .... </h3>
-<form id='frm-addfunds' name='frm-addfunds' method='post' action="https://secure.authorize.net/gateway/transact.dll">
+<form id='frm-addfunds' style="display:none;" name='frm-addfunds' method='post' action="https://secure.authorize.net/gateway/transact.dll">
 <input type='hidden' name="x_login" value="{$api_login_id}" />
 <input type='hidden' name="x_fp_hash" value="{$fingerprint}" />
 <input type='hidden' name="x_amount" value="{$amount}" />
@@ -3571,7 +3580,8 @@ db_update('egiftcard') // Table name no longer needs {}
 
 
 //Envio de emails: comprador , amigo , dealcountry stuff 
-$sql = "select eg.email , eg.name   , g.code , g.id from egiftcard eg 
+$sql = "select eg.email , eg.name   , g.code , g.id , eg.amount , eg.message , eg.type
+from egiftcard eg 
 left join giftcard g on g.id = eg.idgiftcard
 where eg.idtransaction =".$data['x_invoice_num'];
 $rs = db_query($sql);
@@ -3580,21 +3590,53 @@ $eg = $rs->fetchObject();
 //Comprador 
   $to = $user->mail;
   $from = 'noreply@dealcountry.com';
-  $params = array(
-    'subject' => 'DealCountry : E-GIFTCARD PURCHASE',
-    'body' => "A E-Gift Card has been sent to ".$eg->name." email: ".$eg->email,
+  global $base_url;
+  $tpl = file_get_contents($base_url . '/sites/all/modules/custom/giftcard/egiftcard-cliente.php');
+   //$tpl = file_get_contents('egiftcard-cliente.php');
+    //DATOS DE LA VARIANTE A COMPRAR
+    $variables['[LOGO]'] = 1;
+    $variables['[cliente_nombre]'] = $eg->name;
+    $variables['[cliente_descripcion]'] = $eg->message;
+    $variables['[cliente_email]'] = $eg->email;
+    $variables['[cliente_tarjeta]'] = _giftcard_get_url_card($eg->type);
+    $variables['[imagen_separacion_inicio]'] = "img";
+    $variables['[imagen_separacion_final]'] = "img";
+    $variables['[imagen_carita]'] = "img";
+    $variables['[user_name]'] = $user->name;
+
+    $body = str_replace(array_keys($variables),array_values($variables),$tpl);
+    $params = array(
+    'subject' => $eg->name . " has received your $".$eg->amount." E-dealcountry.com gift card. ",
+    'body' => $body ,
     // 'gifcard'=>$values["giftcard"],
     );
   drupal_mail('giftcard', 'orders', $to, language_default(), $params, $from, TRUE);
 /********************/
+
+
 //Amigo 
   $to = $eg->email;
   $from = 'noreply@dealcountry.com';
-  $params = array(
-    'subject' => 'DealCountry : E-GIFTCARD for you',
-    'body' => "A E-Gift Card has been sent to you. Code ".$eg->code."-".$eg->id,
-    // 'gifcard'=>$values["giftcard"],
-    );
+  $tpl = file_get_contents($base_url . '/sites/all/modules/custom/giftcard/egiftcard-beneficiario.php');
+   //$tpl = file_get_contents('egiftcard-cliente.php');
+    //DATOS DE LA VARIANTE A COMPRAR
+    $variables['[LOGO]'] = 1;
+    $variables['[cliente_nombre]'] = $eg->name;
+    $variables['[cliente_descripcion]'] = $eg->message;
+    $variables['[cliente_email]'] = $eg->email;
+    $variables['[cliente_tarjeta]'] = _giftcard_get_url_card($eg->type);
+    $variables['[imagen_separacion_inicio]'] = "img";
+    $variables['[imagen_separacion_final]'] = "img";
+    $variables['[imagen_carita]'] = "img";
+    $variables['[user_name]'] = $user->name;
+    $variables['[giftcard_number]'] = $eg->code."-".$eg->id;
+
+    $body = str_replace(array_keys($variables),array_values($variables),$tpl);
+    $params = array(
+      'subject' => 'You have recieved a $'.$eg->amount . "E-dealcountry.com gift card from <b>".$user->name."</b>",
+      'body' => $body,
+      
+      );
   drupal_mail('giftcard', 'orders', $to, language_default(), $params, $from, TRUE);
 /********************/
 //stuff
@@ -3643,7 +3685,44 @@ function giftcard_ordenes_pendientes($codeID){
 
 
 
+function _giftcard_get_url_card($type){
 
+global $base_url;
+
+  switch ($type) {
+    case '1':
+      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-thinking-of-you.jpg";
+      break;
+    case '2':
+      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-thinking-about-you.jpg";
+      break;
+    case '3':
+      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-happy-birthday.jpg";
+      break;
+    case '4':
+      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-congratulations.jpg";
+      break;
+    case '5':
+      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-thinking-you.jpg";
+      break;
+    case '6':
+      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-happy-fathers-day.jpg";
+      break;
+    case '7':
+      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-merry-christmas.jpg";
+      break;
+    case '8':
+      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-happy-new-year.jpg";
+      break;
+    
+    default:
+      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-thinking-of-you.jpg";
+      break;
+  }
+
+  return $url;
+
+}
 
 
 
