@@ -7,7 +7,7 @@
 <body>
 	<table>
 		<tr class="cabecera">
-			<td>[LOGO]</td>
+			<td><img src="[LOGO]" alt=""></td>
 		</tr>
 		<tr>
 			<table class="cuerpo">
@@ -20,7 +20,7 @@
 						<p>
 						<div class="text-normal oscuro" style="font-size: 16px; color:#555;"> We have sent your E-dealcountry.com gift card to [cliente_email]. Please see below for a preview. </div>
 						</p>
-						<div>[imagen_separacion_inicio]</div>
+						<div><img src="[imagen_separacion_inicio]" alt=""></div>
 					</td>
 				</tr>
 				<tr class="preview_egiftcard">
@@ -30,7 +30,7 @@
 						<div class="text-normal claro" style="font-size: 16px; color:#777;"> <i>[cliente_descripcion] </i></div>
 						</p>
 						<div class="text-normal claro"> <img src="[cliente_tarjeta]" alt=""> </div>
-						<div>[imagen_separacion_final]</div>
+						<div><img src="[imagen_separacion_final]" alt=""></div>
 					</td>
 				</tr>
 				<tr>
@@ -42,7 +42,7 @@
 					<td>
 						<table>
 							<tr  style="font-size: 18px; color:#777;text-align:center">
-								<td>[imagen_carita]</td>
+								<td><img src="[imagen_carita]" alt=""></td>
 								<td>
 									<a href="www.dealcountry.com">NOW CLICK HERE</a> to go to your account and send another Gift Card or find some great deals for 
 									yourself!

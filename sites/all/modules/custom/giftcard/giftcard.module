@@ -3594,14 +3594,14 @@ $eg = $rs->fetchObject();
   $tpl = file_get_contents($base_url . '/sites/all/modules/custom/giftcard/egiftcard-cliente.php');
    //$tpl = file_get_contents('egiftcard-cliente.php');
     //DATOS DE LA VARIANTE A COMPRAR
-    $variables['[LOGO]'] = 1;
+    $variables['[LOGO]'] ="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/deal_country_logo.png";
     $variables['[cliente_nombre]'] = $eg->name;
     $variables['[cliente_descripcion]'] = $eg->message;
     $variables['[cliente_email]'] = $eg->email;
     $variables['[cliente_tarjeta]'] = _giftcard_get_url_card($eg->type);
-    $variables['[imagen_separacion_inicio]'] = "img";
-    $variables['[imagen_separacion_final]'] = "img";
-    $variables['[imagen_carita]'] = "img";
+    $variables['[imagen_separacion_inicio]'] =  "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/adorno-up.gif";
+    $variables['[imagen_separacion_final]'] = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/adorno-down.gif";
+    $variables['[imagen_carita]'] = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/gift-smile.gif";
     $variables['[user_name]'] = $user->name;
 
     $body = str_replace(array_keys($variables),array_values($variables),$tpl);
@@ -3620,14 +3620,10 @@ $eg = $rs->fetchObject();
   $tpl = file_get_contents($base_url . '/sites/all/modules/custom/giftcard/egiftcard-beneficiario.php');
    //$tpl = file_get_contents('egiftcard-cliente.php');
     //DATOS DE LA VARIANTE A COMPRAR
-    $variables['[LOGO]'] = 1;
     $variables['[cliente_nombre]'] = $eg->name;
     $variables['[cliente_descripcion]'] = $eg->message;
     $variables['[cliente_email]'] = $eg->email;
     $variables['[cliente_tarjeta]'] = _giftcard_get_url_card($eg->type);
-    $variables['[imagen_separacion_inicio]'] = "img";
-    $variables['[imagen_separacion_final]'] = "img";
-    $variables['[imagen_carita]'] = "img";
     $variables['[user_name]'] = $user->name;
     $variables['[giftcard_number]'] = $eg->code."-".$eg->id;
 
