@@ -7,7 +7,7 @@
 <body>
 	<table>
 		<tr class="cabecera">
-			<td>[LOGO]</td>
+			<td><img src="[LOGO]" alt=""></td>
 		</tr>
 		<tr>
 			<table class="cuerpo">
@@ -30,7 +30,7 @@
 						<div class="text-normal claro" style="font-size: 16px; color:#777;"> <i>[cliente_descripcion] </i></div>
 						</p>
 						<div class="text-normal claro"> <img src="[cliente_tarjeta]" alt=""> </div>
-						<div>[imagen_separacion_final]</div>
+						<div><img src="[imagen_separacion_final]" alt=""></div>
 					</td>
 				</tr>
 				<tr>
@@ -50,7 +50,7 @@
 						<br>
 						<div style="font-size: 18px; color:#444;"><b>Customer Support</b></div>
 						<div>support@dealcountry.com</div>
-						<div>[LOGO]</div>
+						<div><img src="[LOGO]" alt=""></div>
 					</td>
 				</tr>
 
