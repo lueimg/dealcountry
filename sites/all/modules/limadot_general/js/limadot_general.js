@@ -66,6 +66,7 @@
 			$(".col-sm-3.mini").empty();*/
 			$(".region-sidebar-second-top").prependTo($("#page-header"));
 			Drupal.settings.limadot_general.option_list_selected = "grid";
+			window.listado = "grid";
 		} else {
 			$(".view-deals-front").addClass("option-list");
 			$(".region-content").parent().removeClass("col-sm-12");
@@ -79,6 +80,8 @@
 			$("#page-header").empty();*/
 			$(".region-sidebar-second-top").prependTo($(".col-sm-3.mini"));
 			Drupal.settings.limadot_general.option_list_selected = "list";
+			window.listado = "list";
+
 		}
 	}
 	

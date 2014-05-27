@@ -864,6 +864,7 @@ function giftcard_order_form($node, &$form_state){
 
 //MOSTRAR OFERTA SELECCIONADA
 $nid = arg(2);
+
 if(!empty($nid))
 	$_SESSION['giftcardoffer'] = $nid;
 else
@@ -874,22 +875,27 @@ $view = views_get_view('selected_deal');
 $offer =  $view->preview('default', $args);
 
 
-$form['offer'] = array(
-  '#markup' => $offer,
-    '#prefix' => '<div class="orderoffer">',
-  '#suffix' => '</div>',
-  );
+$form['offer'] = array(  '#markup' => $offer,    '#prefix' => '<div class="orderoffer">',  '#suffix' => '</div>',  );
 
-$form['nid'] = array(
-    '#type' => 'hidden',
-    '#value' => $nid,
-  ); 
+$form['nid'] = array(    '#type' => 'hidden',    '#value' => $nid,  ); 
+ 
+$form['codefull'] = array(
+          '#type' => 'select',
+          '#title' => t('Select your giftcard:'),
+          '#options' => giftcard_mygiftcard_options($user->uid),
+          '#attributes' => array('class'=>array('part1')),
+          '#ajax'=>array(
+            'callback'=> 'giftcard_ajax_validate',
+            'change'=>TRUE,
+            'effect' => 'fade',
+            ),
+        );
 
- $form['giftcard'] = array(
+$form['giftcard'] = array(
     '#type' => 'textfield',
-    '#title' => t('Gift card code:'),
-    '#required' => TRUE,
+    '#title' => t('Gift card number:'),
     '#suffix' => "<div id=\"giftcardmessage\"></div>",
+    '#attributes' => array('placeholder'=>array('..-.......-....')),
     '#ajax'=>array(
     	'callback'=> 'giftcard_ajax_validate',
     	'keypress'=>TRUE,
@@ -908,6 +914,7 @@ $form['nid'] = array(
         '#type' => 'textfield',
         '#title' => t('Name:'),
         '#required' => TRUE,
+        '#attributes' => array('id'=>array('text_name')),
         '#default_value'=>""
       );
 
@@ -1002,10 +1009,14 @@ function giftcard_order_form_validate($form, &$form_state) {
 global $user;
 
 	//VALIDAR GIFT CARD
-	$code = $form_state['values']['giftcard'];
-	$nid = $form_state['values']['nid'];
+  $codefull = $form_state['values']['codefull'];
+  
+  if($codefull == "new")
+	   $codefull = $form_state['values']['giftcard'];
+	
+  $nid = $form_state['values']['nid'];
 
-	$validate = giftcard_validate_code( $code , $user->uid , $nid);
+	$validate = giftcard_validate_codefull( $codefull , $user->uid , $nid );
 
 	if(!$validate["validate"])
 		form_set_error('giftcard', $validate["message"]);
@@ -1023,17 +1034,22 @@ function giftcard_order_form_submit($form, &$form_state) {
   // dsm($form_state);
 global $user;
 $values  = $form_state["values"];
-$rs = db_query("select * from giftcard g where g.state = 1 and g.status = 1 and g.start_date <= NOW() AND CONCAT(code,'-',id) = '".$values["giftcard"]."'");
+
+$codefull = $values["codefull"];
+if($codefull == "new")
+  $codefull = $values["giftcard"];
+
+$rs = db_query("select * from giftcard g where g.state = 1 and g.status = 1 and g.start_date <= NOW() AND CONCAT(code,'-',id) = '".$codefull."'");
 		
 $giftcard = $rs->fetchObject(); 
 
 // VALIDAR PEDIDO
-// dsm("select * from giftcard g where g.state = 1 and g.status = 1 and g.start_date <= NOW() AND CONCAT(code,'-',id) = '".$values["giftcard"]."'");
+// dsm("select * from giftcard g where g.state = 1 and g.status = 1 and g.start_date <= NOW() AND CONCAT(code,'-',id) = '".$codefull."'");
 // AGREGAR GIFT CARD AL USUARIO
 
-  $add = giftcard_register_to_user( $values["giftcard"] , $user->uid );
+  $add = giftcard_register_to_user( $codefull , $user->uid );
 // DISMINUIR GIFTCARD
-  $charge = giftcard_discrease_balance_value( $values["giftcard"] , $values["nid"] );
+  $charge = giftcard_discrease_balance_value( $codefull , $values["nid"] );
 // REGISTRAR PEDIDO Y MOSTRARLO EN LA LISTA
   $idorder = giftcard_register_order($values);
 // REGISTRAR DETALLE A DE USO DE GIFTCARD
@@ -1049,10 +1065,10 @@ $giftcard = $rs->fetchObject();
 
 }
 
-function giftcard_validate_code( $code , $uid , $nid ){
-  $code  = trim($code);
+function giftcard_validate_codefull( $codefull , $uid , $nid ){
+  $codefull  = trim($codefull);
 		$rs = db_query("select *  from giftcard g 
-     where g.state = 1 and g.status = 1 and  CONCAT(code,'-',id) = '".$code."'");
+     where g.state = 1 and g.status = 1 and  CONCAT(code,'-',id) = '".$codefull."'");
 		// g.start_date <= NOW() and // se quito esta opcion por si se activa a destiempo un giftcard
 		$giftcard = $rs->fetchObject();  
 		$alert = "";
@@ -1078,7 +1094,7 @@ function giftcard_validate_code( $code , $uid , $nid ){
     
 
 		if ($price > $balance_value) {
-			return array("validate"=>FALSE , "message"=>"The value of the deal selected exceeds the value of your gift card. Please <a href='/myaccount/addfunds'>add funds</a> to your Gift Card. <br> Your balance value is $ ".$balance_value, "alert"=>$alert );
+			return array("validate"=>FALSE , "message"=>"The value of the deal selected exceeds the value of your gift card. Please <a href='/myaccount/addfunds?pendent_order=$nid'>click here to add funds</a> to your Gift Card. <br> Your gift card balance is $ ".$balance_value, "alert"=>$alert );
       
 		}else{
 			
@@ -1094,11 +1110,6 @@ function giftcard_validate_code( $code , $uid , $nid ){
 
 			}
     }
-     
-
-
-
-			
 			$message = "Your gift card balance is $ ".$balance_value .".";
 			return array("validate"=>TRUE , "message"=> $message, "alert"=>$alert);
 		}
@@ -1114,12 +1125,16 @@ function giftcard_ajax_validate($form, $form_state) {
 
 
 	global $user;
+  $uid = $user->uid;
+
 	$nid = $form_state['values']['nid'];
-	$code = $form_state['values']['giftcard'];
-	$uid = $user->uid;
 
+  $codefull = $form_state['values']['codefull'];
+  if($codefull == "new"){
+    $codefull = $form_state['values']['giftcard'];
+  }
 
-	$respuesta = giftcard_validate_code( trim($code) , $uid , $nid );
+	$respuesta = giftcard_validate_codefull( trim($codefull) , $uid , $nid );
 	$resp = $respuesta["message"];
   $validate= $respuesta["validate"];
   if(!$validate){
@@ -1128,12 +1143,16 @@ function giftcard_ajax_validate($form, $form_state) {
     $class="alert alert-block alert-success";
     $link = "<a class='applicabletaxes colorbox-load' href='/applicabletaxes/$nid?width=850'>Click here for shipping fees and Taxes (if applicable)</a>";
   }
+
+  if(empty($codefull)){
+    $resp = "Please, write your giftcard";
+  }
+
   $resp  = "<div class=\"$class\">". $resp ."</div>".$link;
 
- $commands = array();
-  // Replace the content of '#object-1' on the page with 'some html here'.
+   $commands = array();
+   // Replace the content of '#object-1' on the page with 'some html here'.
    $commands[] = ajax_command_replace('#giftcardmessage', "<div id=\"giftcardmessage\">".$resp."</div>");
-
    $commands[] = ajax_command_replace('#orderalert',"<div id=\"orderalert\">" . $respuesta["alert"] . "</div>");
  
   return array('#type' => 'ajax', '#commands' => $commands);
@@ -1151,20 +1170,29 @@ function giftcard_register_order($values){
 
 	// DATOS DE GIFTCARD
 	// $rs = db_query("select * from giftcard g where g.state = 1 and g.status = 1 and g.end_date >= NOW() AND g.code = '".$values["giftcard"]."'");
-
-    $rs = db_query("select *  from giftcard g 
-     where g.state = 1 and g.status = 1 and g.start_date <= NOW() and CONCAT(code,'-',id) = '".$values["giftcard"]."'");
+$codefull = $values['codefull'];
+  if($codefull == "new"){
+    $codefull = $values['giftcard'];
+  }
+    $sql = "select *  from giftcard g 
+     where g.state = 1 and g.status = 1  and CONCAT(code,'-',id) = '".$codefull."'";
+    $rs = db_query($sql);
 
 
 	$giftcard = $rs->fetchObject();  
+  if(empty($giftcard)){
+    drupal_set_message(t("We have a problem with your giftcard number, $codefull"), 'status', FALSE);
+    drupal_goto("node/".$values['nid']);
+    return "";
+  }
   // dsm($giftcard);
 	// DATOS OFERTA
 	$node  = node_load($values['nid']);
 	$price = $node->field_deal_price_value['und'][0]['value'];
 
   $args = array($values['nid']);
-$view = views_get_view('selected_deal');
-$offer =  $view->preview('default', $args);
+  $view = views_get_view('selected_deal');
+  $offer =  $view->preview('default', $args);
 
 
 
@@ -1203,9 +1231,10 @@ $offer =  $view->preview('default', $args);
           // dsm($nid);
 
 //ENVIO DE EMAILS
+global $base_url;
 $body = <<<EOD
 <div>
-<div class="data"><span style="font-weight:bold">Giftcard Number: </span>{$values["giftcard"]}<br></div>
+<div class="data"><span style="font-weight:bold">Giftcard Number: </span>{$codefull}<br></div>
 <div class="data"><span style="font-weight:bold">Name : </span>{$values['name']}<br></div>
 <div class="data"><span style="font-weight:bold">Last Name : </span>{$values['lastname']}<br></div>
 <div class="data"><span style="font-weight:bold">Email Address : </span>{$values['mail']}<br></div>
@@ -1216,7 +1245,7 @@ $body = <<<EOD
 <div class="data"><span style="font-weight:bold">Postal code : </span>{$values['postalcode']}<br></div>
 <div class="data"><span style="font-weight:bold">Order details : </span>{$values['orderdetail']}<br></div>
 <div class="data"><span style="font-weight:bold">Product Name : </span>{$node->title}<br></div>
-<div class="data"><span style="font-weight:bold">Product Url : </span><a href="http://dealcountry.dev/node/{$node->nid}">http://dealcountry.dev/node/{$node->nid}</a></div>
+<div class="data"><span style="font-weight:bold">Product Url : </span><a href="{$base_url}/node/{$node->nid}">{$base_url}/node/{$node->nid}</a></div>
 </div>
 EOD;
 
@@ -1279,12 +1308,12 @@ function giftcard_discrease_balance_value( $codefull = 0 , $nid = 0  , $charge =
     if(!empty($codefull)){
       
         $rs = db_query("select *  from giftcard g 
-         where g.state = 1 and g.status = 1 and g.start_date <= NOW() and CONCAT(code,'-',id) = '".$codefull."'");
+         where g.state = 1 and g.status = 1  and CONCAT(code,'-',id) = '".$codefull."'");
       	$giftcard = $rs->fetchObject(); 
 
     }elseif(!empty($giftid)){
         $rs = db_query("select *  from giftcard g 
-         where g.state = 1 and g.status = 1 and g.start_date <= NOW() and id = $giftid");
+         where g.state = 1 and g.status = 1 and id = $giftid");
         $giftcard = $rs->fetchObject(); 
     }
     if(empty($giftcard)){
@@ -1366,7 +1395,6 @@ $header = array(
              array('data' => t('Gift Card Number'), 'field' => 'code'),
              // array('data' => t('Activation Date'), 'field' => 'start_date'),
              array('data' => t('Balance on GiftCard'), 'field' => 'balance_value'),
-             
            );
 
     //query
@@ -1384,9 +1412,19 @@ $header = array(
     $logo = "<img src='/sites/all/themes/bootstrap_dealcountry/images/gifcard.jpg' />";
     foreach($result as $res){
 
-      $rows[] = array($logo, $res->code.'-'.$res->id , 
+      // SI EL GIFTCARD TIENE UNA ORDEN EN ESTADO ON REQUEST
+      $es_onrequest = giftcard_ordenes_pendientes($res->id);
+      if($es_onrequest){
+        $preview_message = "<br>* Balance before shipping fees and taxes added, if applicable.";
+      }else
+        $preview_message = "";
+
+
+      $rows[] = array(
+        $logo, 
+        $res->code.'-'.$res->id , 
         // $res->start_date , 
-        "$ " . $res->balance_value );
+        "$ " . $res->balance_value  . $preview_message );
 
     }
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'sort-table','class'=>"giftcards")));
@@ -1423,8 +1461,12 @@ $header = array(
 
     $rows = array();
     foreach($result as $res){
-
-      $rows[] = array($logo, $res->code .'-'.$res->idgiftcard , $res->created , "$ " . $res->charge );
+      $codeID =  (strpos($res->code, "EG") === false)?$res->idgiftcard:"XXXX";
+      $rows[] = array(
+        $logo, 
+        $res->code .'-'.  $codeID , 
+        $res->created ,
+        "$ " . $res->charge );
 
     }
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'sort-table')));
@@ -1436,7 +1478,7 @@ $header = array(
     drupal_set_title("My Gift Cards");
     $page = "<a href=\"/myaccount/register-giftcard\">+ Register Gift Card</a>";
 
-    $title2 = "<h3 class='subtitle'>Transaction History</h3>";
+    $title2 = "<h3 class='subtitle'>Transaction History for Added Funds</h3>";
 
 
     return  $page.$table."<p></p>".$title2.$table2;
@@ -1537,7 +1579,16 @@ return $data;
 
 function giftcard_page_add_funds_form($form_state){
 	
-  global $user; 
+//REVISAMOS SI PROVIENE DE UNA ORDER DE COMPRA PARA VOLVER A SU COMPRA
+$order  = $_GET['pendent_order'];
+if(!empty($order)){
+  $_SESSION['pendent_order'] = $order;
+}else{
+  unset($_SESSION['pendent_order']);
+}
+
+
+global $user; 
 
 $form['code'] = array(
           '#type' => 'select',
@@ -1553,8 +1604,8 @@ $form['newcode'] = array(
           // '#required' => TRUE,
           '#default_value'=>"",
           '#attributes' => array('class'=>array('part2'),'placeholder'=>array('..-.......-....')),
-
         );
+
 $form['amount'] = array(
           '#type' => 'textfield',
           '#title' => t('Select the amount:'),
@@ -1660,11 +1711,11 @@ $fp_timestamp = time();
 $fp_sequence = $_SESSION['formvalues']['invoice'];// Enter an invoice or other unique number.
 $fingerprint = AuthorizeNetSIM_Form::getFingerprint($api_login_id,
   $transaction_key, $amount, $fp_sequence, $fp_timestamp);
-global $user;
+global $user, $base_url;
 
 $html= <<<EOD
-
-<form method='post' action="https://secure.authorize.net/gateway/transact.dll">
+<h3> Please , wait a moment .... </h3>
+<form id='frm-addfunds' name='frm-addfunds' method='post' action="https://secure.authorize.net/gateway/transact.dll" style='display:none;'>
 <input type='hidden' name="x_login" value="{$api_login_id}" />
 <input type='hidden' name="x_fp_hash" value="{$fingerprint}" />
 <input type='hidden' name="x_amount" value="{$amount}" />
@@ -1679,9 +1730,12 @@ $html= <<<EOD
 <INPUT TYPE=HIDDEN NAME="x_cust_id" VALUE="{$user->uid}">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_method" VALUE="POST">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_text" VALUE="Click here to return to our home page">
-<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="http://dealcountry.dev/myaccount/fundsreceipt">
+<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="{$base_url}/myaccount/fundsreceipt">
 <input type='submit' value="Click here for the secure payment form">
 </form>
+<script>
+  jQuery('#frm-addfunds').submit();
+</script>
 EOD;
 
 unset($_SESSION['formvalues']);
@@ -1737,10 +1791,7 @@ $form['filter']['status'] = array(
 );
 
 
-$form['filter']['submit'] = array(
-  '#type' => 'submit',
-  '#value' => t('Filter'),
-);
+$form['filter']['submit'] = array(  '#type' => 'submit',  '#value' => t('Filter'),);
 
 
 
@@ -1981,7 +2032,7 @@ EOD;
   es la suma del balance_value del gift card + el monto de los pedidos aun pendientes
   */
 function giftcard_balance_value_enable($idgiftcard){
-
+ // dsm($idgiftcard);
   $rs = db_query('SELECT balance_value FROM giftcard where id = '.$idgiftcard);
   $obj = $rs->fetchObject();
 
@@ -2613,7 +2664,7 @@ $row = $rs->fetchObject();
 
 db_query("update giftcard set balance_value = balance_value + ".$data['x_amount']." where id = ".$row->idgiftcard);
 giftcard_register_detail($row->idgiftcard , $type = 2 , $description = 'Add funds' , $data['x_amount'] , $idorder  = 0 , $data['x_invoice_num']  );          
-drupal_set_message(t("Your pay has been accepted."), 'status', FALSE);
+drupal_set_message(t("Your transaction has been completed. Thank you!"), 'status', FALSE);
 drupal_goto("myaccount");
 return "";
 
@@ -3272,12 +3323,16 @@ $form['filter']['cards'] = array(
   '#type' => 'radios',
   '#title' => t('Cards:'),
   '#required' => TRUE,
+  '#attributes'=>array('class'=>'cards'),
   '#options' => array(
-          1 => t('happy'),
-          2 => t('Aniversary'),
-          3 => t('I am love'),
-          4 => t('I am love2'),
-          5 => t('I am love3'),
+          1 => t('Thinking of you'),
+          2 => t('Thinking about you'),
+          3 => t('Happy birthday'),
+          4 => t('Congratulations'),
+          5 => t('Thank you'),
+          6 => t("Happy father's day"),
+          7 => t("Merry christmas"),
+          8 => t("Happy new year"),
        ),
 );
 
@@ -3380,11 +3435,11 @@ $fp_timestamp = time();
 $fp_sequence = $_SESSION['transaction']['invoice'];// Enter an invoice or other unique number.
 $fingerprint = AuthorizeNetSIM_Form::getFingerprint($api_login_id,
   $transaction_key, $amount, $fp_sequence, $fp_timestamp);
-global $user;
+global $user, $base_url;
 
 $html= <<<EOD
-
-<form method='post' action="https://secure.authorize.net/gateway/transact.dll">
+<h3> Please , wait a moment .... </h3>
+<form id='frm-addfunds' name='frm-addfunds' method='post' action="https://secure.authorize.net/gateway/transact.dll">
 <input type='hidden' name="x_login" value="{$api_login_id}" />
 <input type='hidden' name="x_fp_hash" value="{$fingerprint}" />
 <input type='hidden' name="x_amount" value="{$amount}" />
@@ -3399,9 +3454,12 @@ $html= <<<EOD
 <INPUT TYPE=HIDDEN NAME="x_cust_id" VALUE="{$user->uid}">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_method" VALUE="POST">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_text" VALUE="Click here to return to our home page">
-<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="http://dealcountry.dev/myaccount/fundsreceipt">
+<INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="{$base_url}/myaccount/fundsreceipt">
 <input type='submit' value="Click here for the secure payment form">
 </form>
+<script>
+  jQuery('#frm-addfunds').submit();
+</script>
 EOD;
 
 unset($_SESSION['transaction']);
@@ -3451,7 +3509,14 @@ if($row->type == 1){
 
   db_query("update giftcard set balance_value = balance_value + ".$data['x_amount']." where id = ".$row->idgiftcard);
   giftcard_register_detail($row->idgiftcard , $type = 2 , $description = 'Add funds' , $data['x_amount'] , $idorder  = 0 , $data['x_invoice_num']  );     
-  
+  // VER SI PROVIENE DE UNA COMPRA PENDIENTE
+  if(!empty($_SESSION["pendent_order"])){
+    drupal_set_message(t("Your transaction has been completed. Thank you!"), 'status', FALSE);
+    $nid = $_SESSION["pendent_order"];
+    unset($_SESSION["pendent_order"]);
+    drupal_goto("giftcard/order/".$nid);
+  }
+
 }else{
 //si es una compra
 $prefix = "EG";
@@ -3546,7 +3611,7 @@ $eg = $rs->fetchObject();
 }
 
 
-drupal_set_message(t("Your Pay has been accepted."), 'status', FALSE);
+drupal_set_message(t("Your transaction has been completed. Thank you!"), 'status', FALSE);
 drupal_goto("myaccount");
 return "";
 
@@ -3556,7 +3621,25 @@ return "";
 
 
 
+function giftcard_ordenes_pendientes($codeID){
+  
+  if(empty($codeID)){
+    drupal_set_message(t("We have a problem with the giftcard number : $codeID . Please contact with the administrator"), 'status', FALSE);
+    return false;
+  }
 
+  $sql = "select 1 from orders o where o.status = 1 and o.idgiftcard = $codeID";
+
+  $result = db_query($sql);
+  
+  $cant = $result->rowCount();
+  
+  if($cant){
+    return true;
+  }
+
+  return false;
+}
 
 
 

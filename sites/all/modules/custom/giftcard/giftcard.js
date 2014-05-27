@@ -39,3 +39,41 @@ jQuery().ready(function(){
 	});
 
 });
+
+
+//FUNCIONES DE PAGINA ORDER 
+jQuery().ready(function(){
+
+	//ESCONDER CAMPO GIFTCARD
+	jQuery(".page-giftcard-order #edit-giftcard")
+    .parent()
+    .hide();
+
+    //VALIDANDO LUEGO DEL SUBMIT
+    var select = jQuery(".page-giftcard-order #edit-codefull").val();
+    if(select == "new"){
+    	jQuery(".page-giftcard-order #edit-giftcard")
+	    .parent()
+	    .show();
+    }else{
+    	jQuery("#edit-codefull").trigger("change")
+    }
+
+    jQuery(".page-giftcard-order #edit-codefull")
+    .change(function(){ 
+      // jQuery("#edit-giftcard").val(jQuery(this).val());
+      if(jQuery(this).val() == 'new'){
+        jQuery("#edit-giftcard")
+        .val('')
+        .parent()
+        .show('slow');
+      }else{
+        jQuery("#edit-giftcard")
+        .val('')
+        .parent()
+        .hide('slow');
+      }
+    });
+    
+
+  });
