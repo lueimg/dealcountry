@@ -45,22 +45,27 @@ function limadot_general_init() {
 }
 
 function limadot_general_views_query_alter(&$view, &$query) { 
+	global $_SESSION;
 	if ($view->name == 'deals_front') {
-		//if (isset($query->where[2]["conditions"][7]))
-			//$query->where[2]["conditions"][7]["field"] = "field_data_field_deal_categories.field_deal_categories_tid";
-		/*if(isset($_GET["field_deal_categories_tid"]) && is_numeric($_GET["field_deal_categories_tid"])) {
-			//$query->where[2]["conditions"][7]["field"] = "field_data_field_deal_categories.field_deal_categories_tid";
-			$query->where[2]["conditions"][7]["value"] = "";
-			$query->where[2]["conditions"][7]["value"] = $_GET["field_deal_categories_tid"];
-			$query->where[2]["conditions"][7]["operator"] = "=";
-		}*/
-		//unset($query->where[2]);
-		//dpm($query);
+   
 		if(isset($query->where[0]['conditions'][1]) && $query->where[0]['conditions'][1]["field"] == "node.title") {
 			$query->where[0]['conditions'][1]['operator'] = 'LIKE';
       		$query->where[0]['conditions'][1]['value'] = '%' . $query->where[0]['conditions'][1]['value'] . '%';
 		}
+
+    if(!empty($_REQUEST["field_deal_categories_tid"]) && $_REQUEST["field_deal_categories_tid"] != "All")
+      $query->where[0]['conditions'][0]['value'][':field_data_field_deal_categories_field_deal_categories_tid'] = $_REQUEST["field_deal_categories_tid"];
+
+  	
+		$_SESSION["views"]["deals_front"]["page_1"] = $_SESSION["views"]["deals_front"]["default"];
+	
+	}else{
+
+		$_SESSION["views"]["deals_front"]["default"] = $_SESSION["views"]["deals_front"]["page_1"];
 	}	
+
+
+	
 }
 
 function limadot_general_form_alter(&$form, &$form_state, $form_id) {
@@ -98,38 +103,68 @@ function limadot_general_form_alter(&$form, &$form_state, $form_id) {
 			$location = array();
 			$default_location = "";
 			$path = $_GET['q'];
+			//dsm($_SESSION);
+
+			//if(empty($_SESSION['views']['deals_front']['default']['country']) || $_SESSION['views']['deals_front']['default']['country'] == 'Unknown'){
+				//////$_SESSION['views']['deals_front']['default']['province_name'] = "Ontario";
+				////$_SESSION['views']['deals_front']['default']['province'] = "Ontario";
+				//$_SESSION['views']['deals_front']['default']['city'] = "Toronto";
+				//$_SESSION['views']['deals_front']['default']['country'] = "Canada";
+			//}
 			
 			if($path == 'deals/local') {
-				if ( ! isset($_SESSION["views"]["deals_front"]["default"]["country"]) ) {
+
+				if ( empty($_SESSION["views"]["deals_front"]["default"]["country"]) || $_SESSION["views"]["deals_front"]["default"]["country"] == "Unknown" ) {
+
 					$items = limadot_general_get_location ();
-					$_SESSION["views"]["deals_front"]["default"]["city"] = (isset($items["city_name"]))?$items["city_name"]:'';
+
+					$_SESSION["views"]["deals_front"]["default"]["city"] = (isset($items["city_name"]))?$items["city_name"]:'Toronto';
 					$_SESSION["views"]["deals_front"]["default"]["province"] = (isset($items["province_code"]))?$items["province_code"]:'All';
-					$_SESSION["views"]["deals_front"]["default"]["province_name"] = (isset($items["province_name"]))?$items["province_name"]:$_SESSION["views"]["deals_front"]["default"]["province"];
+					$_SESSION["views"]["deals_front"]["default"]["province_name"] = (isset($items["province_name"]))?$items["province_name"]:"Ontario";
 					$_SESSION["views"]["deals_front"]["default"]["country"] = (isset($items["country_code"]))?$items["country_code"]:'ca';
 				}
-				if(isset($_SESSION["views"]["deals_front"]["default"]["city"]) && $_SESSION["views"]["deals_front"]["default"]["city"] != "") {
+
+				if(!empty($_SESSION["views"]["deals_front"]["default"]["city"]) && $_SESSION["views"]["deals_front"]["default"]["city"] != "Unknown") {
 					$location[] = $_SESSION["views"]["deals_front"]["default"]["city"];
-				}				
-				if(isset($_SESSION["views"]["deals_front"]["default"]["province"]) && $_SESSION["views"]["deals_front"]["default"]["province"] != "All") {
+				}	
+
+
+				if(!empty($_SESSION["views"]["deals_front"]["default"]["province"]) && $_SESSION["views"]["deals_front"]["default"]["province"] != "All") {
+
 					if(isset($_SESSION["views"]["deals_front"]["default"]["province_name"])) 
 						$location[] = $_SESSION["views"]["deals_front"]["default"]["province_name"];
 					else {
 						$location[] = $_SESSION["views"]["deals_front"]["default"]["province"];
 						$_SESSION["views"]["deals_front"]["default"]["province_name"] = $_SESSION["views"]["deals_front"]["default"]["province"];
-					}
-						
+					}	
+
 				}				
-				if(isset($_SESSION["views"]["deals_front"]["default"]["country"]) && $_SESSION["views"]["deals_front"]["default"]["country"] != "All")
+				
+
+
+				if(!empty($_SESSION["views"]["deals_front"]["default"]["country"]) && $_SESSION["views"]["deals_front"]["default"]["country"] != "All")
 					$location[] = location_country_name($_SESSION["views"]["deals_front"]["default"]["country"]);
+
+
 				$default_location = implode(', ', $location);
+
 				$form["combine"]["#default_value"] = $default_location;
 				$form["country"]["#default_value"] = isset($_SESSION["views"]["deals_front"]["default"]["country"])?$_SESSION["views"]["deals_front"]["default"]["country"]:'ca';
+				
 				if(isset($_SESSION["views"]["deals_front"]["default"]["province"])) {
-					$form["province"]["#options"] = array('All' => '-Any-', $_SESSION["views"]["deals_front"]["default"]["province"] => $_SESSION["views"]["deals_front"]["default"]["province_name"]);
+
+					$form["province"]["#options"] = array('All' => '-Any-', 
+						$_SESSION["views"]["deals_front"]["default"]["province"] => $_SESSION["views"]["deals_front"]["default"]["province_name"]);
+
 					$form["province"]["#default_value"] = $_SESSION["views"]["deals_front"]["default"]["province"];
+
 				}
+
+
 				$form["province"]["#default_value"] = isset($_SESSION["views"]["deals_front"]["default"]["province"])?$_SESSION["views"]["deals_front"]["default"]["province"]:'All';	
-				$form["city"]["#default_value"] = isset($_SESSION["views"]["deals_front"]["default"]["city"])?$_SESSION["views"]["deals_front"]["default"]["city"]:'';
+				
+				$form["city"]["#default_value"] = isset($_SESSION["views"]["deals_front"]["default"]["city"])?$_SESSION["views"]["deals_front"]["default"]["city"]:'canada';
+				
 				$_SESSION["views"]["deals_front"]["page_1"] = $_SESSION["views"]["deals_front"]["default"];
 				
 			} elseif($path == 'deals/products') {
@@ -473,11 +508,17 @@ function limadot_general_get_location () {
 	}	
 	// Parseamos la respuesta JSON 
 	$data = json_decode($data, 1); 
-	$location["country_code"] = strtolower($data['Country']);
-	$location["country_name"] = $data['CountryName'];
-	$location["province_code"] = location_province_code(strtolower($data['Country']), $data['RegionName']);
-	$location["province_name"] = $data['RegionName'];
-	$location["city_name"] = $data['CityName'];
+	$location["country_code"] = (!empty($data['Country']) && $data['Country'] != "Unknown")?strtolower($data['Country']):"ca";
+	$location["country_name"] = (!empty($data['CountryName']) && $data['CountryName'] != "Unknown")?$data['CountryName']:"Canada";
+
+	$province = location_province_code(strtolower($data['Country']), $data['RegionName']);
+
+	$location["province_code"] = (!empty($province) && $province != "Unknown")?$province:"ON";
+	// $location["province_name"] = $data['RegionName'];
+	$location["province_name"] = (!empty($data['RegionName']) && $data['RegionName'] != "Unknown")?$data['RegionName']:"Ontario";
+
+	// $location["city_name"] = $data['CityName'];
+	$location["city_name"] = (!empty($data['CityName']) && $data['CityName'] != "Unknown")?$data['CityName']:"Toronto";
 	return $location;
 }
 

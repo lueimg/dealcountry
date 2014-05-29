@@ -3,20 +3,30 @@
 		/*if($('.view-deals-front').length > 0) {
 			$(".view-deals-front").addClass("option-list");
 		}*/
-		$(':input[placeholder]').placeholder({color: '#AEA7B9'});
-		if($('.social-tooltip').length > 0) {	
+
+
 	    	$('.social-tooltip').tooltip();	    
-		}
-		
-		if($('.node-type-deal .group-deal-map .panel-title').length > 0 && $('.node-type-deal .group-deal-map .views-field-field-address span.fn').length > 0) {	
 	    	$('.node-type-deal .group-deal-map .panel-title').text('About ' + $('.node-type-deal .group-deal-map .views-field-field-address span.fn').text());	    
-		}
-		if($('#edit-sort-bef-combine').length > 0) {	
 		    $('#edit-sort-bef-combine').selectpicker();
-		}
-		if($('#edit-field-deal-categories-tid').length > 0) {	
 		    $('#edit-field-deal-categories-tid').selectpicker();
-		}
+				limadot_asign_list("list");			
+
+
+
+		// $(':input[placeholder]').placeholder({color: '#AEA7B9'});
+		// if($('.social-tooltip').length > 0) {	
+	 //    	$('.social-tooltip').tooltip();	    
+		// }
+		
+		// if($('.node-type-deal .group-deal-map .panel-title').length > 0 && $('.node-type-deal .group-deal-map .views-field-field-address span.fn').length > 0) {	
+	 //    	$('.node-type-deal .group-deal-map .panel-title').text('About ' + $('.node-type-deal .group-deal-map .views-field-field-address span.fn').text());	    
+		// }
+		// if($('#edit-sort-bef-combine').length > 0) {	
+		//     $('#edit-sort-bef-combine').selectpicker();
+		// }
+		// if($('#edit-field-deal-categories-tid').length > 0) {	
+		//     $('#edit-field-deal-categories-tid').selectpicker();
+		// }
 		$('input:radio[name="options-deals"]').change(
 		    function(){		
 	            limadot_asign_list($(this).val());	            	
@@ -33,6 +43,21 @@
 			limadot_asign_list("grid");
 		}
 	});
+
+	Drupal.behaviors.reloadFormExpose = {
+		  attach: function (context, settings) {
+		    //jQuery('.view-deals-front.view-display-id-page .view-content').masonry('reload');
+		    jQuery('.social-tooltip').tooltip();	    
+	    	jQuery('.node-type-deal .group-deal-map .panel-title').text('About ' + jQuery('.node-type-deal .group-deal-map .views-field-field-address span.fn').text());	    
+		    jQuery('#edit-sort-bef-combine').selectpicker();
+		    jQuery("[id^='edit-sort-bef-combine']").selectpicker();
+		    jQuery('#edit-field-deal-categories-tid').selectpicker();
+		    jQuery("[id^='edit-field-deal-categories-tid']").selectpicker();
+		    
+				limadot_asign_list("list");		
+
+		  }
+};
 	
 	Drupal.behaviors.limadot_reload_colorbox = {
 		attach : function(context, settings) {

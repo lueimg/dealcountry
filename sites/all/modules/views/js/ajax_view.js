@@ -95,7 +95,7 @@ Drupal.views.ajaxView.prototype.attachPagerAjax = function() {
 Drupal.views.ajaxView.prototype.attachPagerLinkAjax = function(id, link) {
   var $link = $(link);
   var viewData = {};
-  var href = $link.attr('href');debugger;
+  var href = $link.attr('href');//debugger;
   // Construct an object using the settings defaults and then overriding
   // with data specific to the link.
   $.extend(
@@ -113,7 +113,7 @@ Drupal.views.ajaxView.prototype.attachPagerLinkAjax = function(id, link) {
   viewData.field_deal_categories_tid = 7;
   this.element_settings.submit = viewData;
   this.pagerAjax = new Drupal.ajax(false, $link, this.element_settings);
-  debugger;
+ // debugger;
 };
 
 Drupal.ajax.prototype.commands.viewsScrollTop = function (ajax, response, status) {

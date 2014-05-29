@@ -2,72 +2,29 @@
 	Drupal.behaviors.limadot_general_location = {
       attach: function() {
 		  //var input = (document.getElementById('edit-combine'));
-		  $('#edit-combine').removeClass( "ctools-auto-submit-processed" );
-		  $('#edit-combine').addClass( "ctools-auto-submit-exclude" );
-		  $('#edit-title').removeClass( "ctools-auto-submit-processed" );
-		  $('#edit-title').addClass( "ctools-auto-submit-exclude" );
-		  /*var mapOptions = {
-		    componentRestrictions: {country: ["ca"]},
-			types: ['(cities)'],
-		  }*/
-		  /*var autocomplete = new google.maps.places.Autocomplete(input, mapOptions);
-		  google.maps.event.addListener(autocomplete, 'place_changed', function() {
-		    var place = autocomplete.getPlace();
-			//console.log(place);
-			var address = place.address_components;
-			//console.log(address);
-			var filters = ["country", "administrative_area_level_1", "locality", "route", "postal_code"];
-			var data = { "country": "All",  "province": "All", "city": "", "street": "", "postal_code": "" };
-			var province = "All";
-			$("#edit-country").val(data.country);
-			$("#edit-province").val(data.province);
-			$("#edit-city").val(data.city);
-			$("#edit-street").val(data.street);
-			$("#edit-postal-code").val(data.postal_code);
-			$.each( address, function( key, value ) {
-			  var id = $.inArray(value.types[0], filters);
-			  if (id != -1) {
-				switch (id) {
-	            	case 0:
-	                	data.country = value.short_name;
-						$("#edit-country").val(value.short_name.toLowerCase());
-						$("#edit-province").val(province);
-	                    break;
-	                case 1:
-	                	data.province = value.short_name;
-						$("#edit-province").val(value.short_name);
-						province = value.short_name;
-	                    break;
-					case 2:
-	                	data.city = value.short_name;
-						$("#edit-city").val(value.short_name);
-	                    break;
-					case 3:
-	                	data.street = value.short_name;
-						$("#edit-street").val(value.short_name);
-	                    break;
-					case 4:
-	                	data.postal_code = value.short_name;
-						$("#edit-postal-code").val(value.short_name);
-	                    break;
-	          	}
-			  }		  
-			});
-		  $("#edit-submit-deals-front").click();
-		  });*/
+		  //$("[id^=edit-combine]")
+		  $("[id^=edit-combine]")
+		  .removeClass( "ctools-auto-submit-processed" )
+		  .addClass( "ctools-auto-submit-exclude" );
+
+		  //$('#edit-title')
+		  $("[id^=edit-title]")
+		  .removeClass( "ctools-auto-submit-processed" )
+		  .addClass( "ctools-auto-submit-exclude" );
   	  } 
 	}	
+
 	Drupal.behaviors.limadot_general_disable_location = {
 	  attach: function (context, settings) {
-		$('#edit-combine').keypress(function(event) {			
+		$("[id^=edit-combine]").keypress(function(event) {			
 			if (event.keyCode == 13) {
 				//event.preventDefault();
 				$('#edit-submit-deals-front').attr('disabled', true);
-				if ($('.view-deals-front.view-display-id-page_2').length > 0 && $('#edit-combine').val() != "") {
-					$('#edit-title').val($('#edit-combine').val());
+				if ($('.view-deals-front.view-display-id-page_2').length > 0 && $("[id^=edit-combine]").val() != "") {
+					$('#edit-title').val($("[id^=edit-combine]").val());
 					$('#edit-title-1').val("");	
 					//inicio				
-					var value = $('#edit-combine').val();													  
+					var value = $("[id^=edit-combine]").val();													  
 
 					  	
 					  	crossDomainAjax("http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address="+value, function (data_get)  {
@@ -113,10 +70,10 @@
 						          	}
 								  }		  
 								});
-								//$('#edit-combine').val(place.formatted_address);
+								//$("[id^=edit-combine]").val(place.formatted_address);
 							    //$("#edit-submit-deals-front").click();
 							} else {
-								$('#edit-title-1').val($('#edit-combine').val());
+								$('#edit-title-1').val($("[id^=edit-combine]").val());
 							}
 						}
 						$('#edit-submit-deals-front').attr('disabled', false);
@@ -143,65 +100,12 @@
 	}
 	Drupal.behaviors.limadot_general_select_text = {
 	  attach: function (context, settings) {
-		$('#edit-combine').click(function() {
+		$("[id^=edit-combine]").click(function() {
 			$(this).select();
 		});
 	  }
 	}
-	/*Drupal.behaviors.limadot_general_enable_popover = {
-	  attach: function (context, settings) {
-		if ($('.view-deals-front.view-display-id-page').length > 0 || $('.view-deals-front.view-display-id-page_1').length > 0) {
-			$("#edit-combine").hover(function(e) {
-				e.stopPropagation();
-		    	$('#edit-combine').editable('show');
-			});
-		}
-	}}
-	Drupal.behaviors.limadot_general_disable_popover = {
-	  attach: function (context, settings) {
-	  	if ($('.view-deals-front.view-display-id-page').length > 0 || $('.view-deals-front.view-display-id-page_1').length > 0) {
-			$("#edit-combine").mouseout(function(e) {
-				setTimeout(function(){
-					if(!$('.popover').is(':hover')) {
-						e.stopPropagation();
-	    		 		$('#edit-combine').editable('hide');
-					}				
-				},2000);	   	
-			});
-		}
-	}}*/
-	/*Drupal.behaviors.limadot_general_enable_popover_location = {
-	  attach: function (context, settings) {
-		if ($('.view-deals-front.view-display-id-page_2').length > 0) {
-			$.fn.editable.defaults.mode = 'inline';
-			$("#edit-combine").click(function(e) {
-				e.stopPropagation();
-		    	$('#edit-combine').editable('show');
-			});
-		}
-	}}*/
-	/*Drupal.behaviors.limadot_general_enable_popover_2 = {
-	  attach: function (context, settings) {
-		if ($('.view-deals-front.view-display-id-page_2').length > 0) {
-			$("#edit-combine").hover(function(e) {
-				e.stopPropagation();
-		    	$('#edit-combine').popover('show');
-			});
-		}
-	}}
-	Drupal.behaviors.limadot_general_disable_popover_2 = {
-	  attach: function (context, settings) {
-	  	if ($('.view-deals-front.view-display-id-page_2').length > 0) {
-			$("#edit-combine").mouseout(function(e) {
-				setTimeout(function(){
-					if(!$('.popover').is(':hover')) {
-						e.stopPropagation();
-	    		 		$('#edit-combine').popover('hide');
-					}				
-				},2000);	   	
-			});
-		}
-	}}*/
+	
 	
 	$(document).ready(function () {		
 		//$("#edit-sort-bef-combine option[value='created DESC']").attr('data-icon', 'icon-heart');
@@ -358,9 +262,9 @@
       //attach: function() {
       $(document).ready(function () {
 		  if ($('.view-deals-front.view-display-id-page').length > 0 || $('.view-deals-front.view-display-id-page_1').length > 0) {
-		  	$("#edit-combine").prop("readonly", true);
+		  	$("[id^=edit-combine]").prop("readonly", true);
 
-			$('#edit-combine').editable({
+			$("[id^=edit-combine]").editable({
 				type: 'typeaheadjs',
 				pk: 1,
 				placement: 'bottom',
@@ -432,7 +336,7 @@
 						          	}
 								  }		  
 								});
-								$('#edit-combine').val(place.formatted_address);
+								$("[id^=edit-combine]").val(place.formatted_address);
 							    $("#edit-submit-deals-front").click();
 							} else {
 								
@@ -490,7 +394,7 @@
 									          	}
 											  }		  
 											});
-											$('#edit-combine').val(place.formatted_address);
+											$("[id^=edit-combine]").val(place.formatted_address);
 										    $("#edit-submit-deals-front").click();
 										} else {
 											return 'Location not found - please try another';
@@ -519,7 +423,7 @@
 	Drupal.behaviors.limadot_general_popover = {
       attach: function() {
 	  	if ($('.view-deals-front.view-display-id-page_2').length > 0) {
-	  		$('#edit-combine').popover({
+	  		$("[id^=edit-combine]").popover({
 				html: true,
 				placement: 'right',
 				trigger: 'focus',
