@@ -528,7 +528,7 @@ $form = array();
  $form['linksactions'] = array(
   '#markup' => 
   "<a href='/admin/giftcard/add'> + Create giftcards by range</a> "
-  . " | " . "<a href=\"/admin/giftcard/export\"> Export</a>"
+ 
   );
 
 
@@ -618,13 +618,13 @@ $form['filter']['export'] = array(
 
 $form['filter']['active'] = array(
   '#type' => 'submit',
-  '#value' => t('Active cards'),
+  '#value' => t('Activate Cards'),
 );
 
 
 $form['filter']['addfunds'] = array(
   '#type' => 'submit',
-  '#value' => t('Add funds'),
+  '#value' => t('Assign Values'),
 );
 
 
@@ -796,7 +796,7 @@ exit;
   }
 
   
-  }elseif($form_state['clicked_button']["#value"] == "Active cards"){
+  }elseif($form_state['clicked_button']["#value"] == "Activate Cards"){
     $table = $form_state['values']["table"];
 // $trs='';
     $count =0;
@@ -817,9 +817,9 @@ exit;
       drupal_set_message(t("$count Giftcards have been activated : $text"), 'status', FALSE);
 
     }
-  }elseif($form_state['clicked_button']["#value"] == "Add funds"){
+  }elseif($form_state['clicked_button']["#value"] == "Assign Values"){
    $_SESSION["giftcard"]["table"] = $form_state['values']['table'];
-   drupal_set_message(t("add funds"), 'status', FALSE);
+   drupal_set_message(t("Assign Values"), 'status', FALSE);
    drupal_goto("admin/giftcard/list/addfunds");
 
   }
@@ -1256,6 +1256,29 @@ EOD;
     );
   giftcard_send_mail($params);
 
+//NOTIFICACION DE ORDEN
+$body = <<<EOD
+
+Thank you for using your dealcountry.com gift card! Your request will be processed within 2 business days.
+<br>  <br>  
+Best Regards,<br> <br>  
+Client Services <br>  
+<a href="www.dealcountry.com">www.dealcountry.com</a><br> 
+Come Tour all the great deals! 
+ 
+EOD;
+
+  $params = array(
+    'subject' => 'Thank you for using your dealcountry.com gift card',
+    'body' => $body,
+    'gifcard'=>$values["giftcard"],
+    );
+
+  $to = $values['mail'];
+  $from = '"Dealcountry.com" <support@dealcountry.com>';
+  
+    drupal_mail('giftcard', 'orders', $to, language_default(), $params, $from, TRUE);
+
 
 
 
@@ -1500,8 +1523,8 @@ $query = db_select('orders', 'o')
     $query->addField("g","id","idgift");
     $query->leftjoin("giftcard" , "g" , "g.id = o.idgiftcard");
     $query->condition("o.client" , $user->uid , "=");
+    $query->orderBy("o.id","DESC");
     $rs = $query->execute()->fetchAll();
-     // dsm($rs);
     $offers = "";
     foreach ($rs as  $row) {
     	// dsm($value);
@@ -1579,7 +1602,7 @@ return $data;
 function giftcard_page_add_funds_form($form_state){
 	
 //REVISAMOS SI PROVIENE DE UNA ORDER DE COMPRA PARA VOLVER A SU COMPRA
-$order  = $_GET['pendent_order'];
+$order  = @$_GET['pendent_order'];
 if(!empty($order)){
   $_SESSION['pendent_order'] = $order;
 }else{
@@ -2841,8 +2864,9 @@ function giftcard_mail($key, &$message, $params) {
 
 function giftcard_send_mail($params){
 
-    $to = variable_get('giftcard_mail', 'luismori@gmail.com');
-    $from = 'noreply@dealcountry.com';
+    $to = variable_get('giftcard_mail', 'support@dealcountry.com');
+    //$from = 'noreply@dealcountry.com';
+    $from = '"Dealcountry.com" <support@dealcountry.com>';
   
     drupal_mail('giftcard', 'orders', $to, language_default(), $params, $from, TRUE);
 
@@ -3589,24 +3613,30 @@ $eg = $rs->fetchObject();
 
 //Comprador 
   $to = $user->mail;
-  $from = 'noreply@dealcountry.com';
+  $from = '"Dealcountry" <support@dealcountry.com>';
   global $base_url;
-  $tpl = file_get_contents($base_url . '/sites/all/modules/custom/giftcard/egiftcard-cliente.php');
-   //$tpl = file_get_contents('egiftcard-cliente.php');
+  $url = $base_url . '/sites/all/modules/custom/giftcard/egiftcard-cliente.html';
+  $tpl = file_get_contents($url);
+  if(!$tpl){
+    drupal_set_message("No se ha podido enviar correctamente el email en html!");
+    dsm($tpl);
+    dsm($url);
+  }
+   //$tpl = file_get_contents('egiftcard-cliente.html');
     //DATOS DE LA VARIANTE A COMPRAR
-    $variables['[LOGO]'] ="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/deal_country_logo.png";
+    $variables['[LOGO]'] ="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png";
     $variables['[cliente_nombre]'] = $eg->name;
     $variables['[cliente_descripcion]'] = $eg->message;
     $variables['[cliente_email]'] = $eg->email;
     $variables['[cliente_tarjeta]'] = _giftcard_get_url_card($eg->type);
-    $variables['[imagen_separacion_inicio]'] =  "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/adorno-up.gif";
-    $variables['[imagen_separacion_final]'] = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/adorno-down.gif";
+    $variables['[imagen_separacion_inicio]'] =  "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/adorno-up.jpg";
+    $variables['[imagen_separacion_final]'] = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/adorno-down.jpg";
     $variables['[imagen_carita]'] = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/gift-smile.gif";
     $variables['[user_name]'] = $user->name;
 
     $body = str_replace(array_keys($variables),array_values($variables),$tpl);
     $params = array(
-    'subject' => $eg->name . " has received your $".$eg->amount." E-dealcountry.com gift card. ",
+    'subject' => $eg->name . " has received your $".$eg->amount." dealcountry.com E-Gift Card. ",
     'body' => $body ,
     // 'gifcard'=>$values["giftcard"],
     );
@@ -3616,9 +3646,9 @@ $eg = $rs->fetchObject();
 
 //Amigo 
   $to = $eg->email;
-  $from = 'noreply@dealcountry.com';
-  $tpl = file_get_contents($base_url . '/sites/all/modules/custom/giftcard/egiftcard-beneficiario.php');
-   //$tpl = file_get_contents('egiftcard-cliente.php');
+  //$from = 'noreply@dealcountry.com';
+  $tpl = file_get_contents($base_url . '/sites/all/modules/custom/giftcard/egiftcard-beneficiario.html');
+   //$tpl = file_get_contents('egiftcard-cliente.html');
     //DATOS DE LA VARIANTE A COMPRAR
     $variables['[cliente_nombre]'] = $eg->name;
     $variables['[cliente_descripcion]'] = $eg->message;
@@ -3629,7 +3659,7 @@ $eg = $rs->fetchObject();
 
     $body = str_replace(array_keys($variables),array_values($variables),$tpl);
     $params = array(
-      'subject' => 'You have recieved a $'.$eg->amount . "E-dealcountry.com gift card from <b>".$user->name."</b>",
+      'subject' => 'You have recieved a $'.$eg->amount . " dealcountry.com E-Gift Card from <b>".$user->name."</b>",
       'body' => $body,
       
       );
@@ -3637,7 +3667,7 @@ $eg = $rs->fetchObject();
 /********************/
 //stuff
     $to = variable_get('giftcard_mail', 'luismori@gmail.com');
-    $from = 'noreply@dealcountry.com';
+    //$from = 'noreply@dealcountry.com';
     $params = array(
     'subject' => 'DealCountry : E-GIFTCARD has been bought',
     'body' => "A E-Gift Card has been bought. Code ".$eg->code."-".$eg->id,
