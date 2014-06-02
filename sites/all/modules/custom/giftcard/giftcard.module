@@ -1250,7 +1250,8 @@ $body = <<<EOD
 EOD;
 
     $params = array(
-    'subject' => 'DealCountry : Buy with Giftcard '.$values["giftcard"],
+    // 'subject' => 'DealCountry : Buy with Giftcard '.$values["giftcard"],
+    'subject' => 'DealCountry purchase completed notification',
     'body' => $body,
     'gifcard'=>$values["giftcard"],
     );
@@ -3550,7 +3551,7 @@ if($row->type == 1){
     drupal_goto("giftcard/order/".$nid);
   }
 
-}else{
+}else{ 
 //si es una compra
 $prefix = "EG";
 $service_fee = 0;
@@ -3617,11 +3618,7 @@ $eg = $rs->fetchObject();
   global $base_url;
   $url = $base_url . '/sites/all/modules/custom/giftcard/egiftcard-cliente.html';
   $tpl = file_get_contents($url);
-  if(!$tpl){
-    drupal_set_message("No se ha podido enviar correctamente el email en html!");
-    dsm($tpl);
-    dsm($url);
-  }
+
    //$tpl = file_get_contents('egiftcard-cliente.html');
     //DATOS DE LA VARIANTE A COMPRAR
     $variables['[LOGO]'] ="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png";
@@ -3675,6 +3672,7 @@ $eg = $rs->fetchObject();
     );
     drupal_mail('giftcard', 'orders', $to, language_default(), $params, $from, TRUE);
 
+    drupal_set_message(t("Please check your Email for a record of your order."), 'status', FALSE);
 
 }
 
