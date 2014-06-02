@@ -444,8 +444,8 @@ $nid = db_insert('giftcard') // Table name no longer needs {}
 
 
  function _giftcard_orders_generate_options($id){
-    $links = l(t('View'), "admin/giftcard/orders/view/$id").  '&nbsp;&nbsp;'.
-             l(t('Edit'), "admin/giftcard/orders/edit/$id").  '&nbsp;&nbsp;'.
+    $links = // l(t('View'), "admin/giftcard/orders/view/$id").  '&nbsp;&nbsp;'.
+             l(t('Update'), "admin/giftcard/orders/edit/$id").  '&nbsp;&nbsp;'.
             l(t('Cancel'),"admin/giftcard/orders/cancel/$id").  '&nbsp;&nbsp;'
             ;
     return $links;
@@ -460,44 +460,7 @@ $nid = db_insert('giftcard') // Table name no longer needs {}
     return $links;
  }
 
-// function giftcard_list(){
 
-// $header = array(
-//              array('data' => t('ID'), 'field' => 'id', 'sort' => 'asc'), // sort
-//              array('data' => t('Code'), 'field' => 'code'),
-//              array('data' => t('Original value'), 'field' => 'original_value'),
-//              array('data' => t('Balance value'), 'field' => 'balance_value'),
-//              array('data' => t('Client'), 'field' => 'client'),
-//              array('data' => t('Start Date'), 'field' => 'start_date'),
-//              array('data' => t('End Date'), 'field' => 'end_date'),
-//              array('data' => t('Service Fee'), 'field' => 'service_fee'),
-//              array('data' => t('Status'), 'field' => 'status'),
-//              array('data' => t('Created'), 'field' => 'created', 'sort' => 'asc'),
-//              array('data' => t('Actions'), ),
-//            );
-
-// //query
-// $query = db_select('giftcard', 'g');
-
-//     $query->fields('g', array('id', 'code', 'original_value','balance_value','client','start_date','end_date','service_fee','status',"created"));
-//     $table_sort = $query->extend('TableSort') // Add table sort extender.
-//                         ->orderByHeader($header); // Add order by headers.
-//     $pager = $table_sort->extend('PagerDefault')
-//                         ->limit(15); // 5 rows per page.
-//     $result = $pager->execute();
-
-//     $rows = array();
-//     foreach($result as $res){
-
-//       $rows[] = array($res->id, $res->code, $res->original_value,$res->balance_value ,$res->client,$res->start_date,$res->end_date,$res->service_fee,$res->status , $res->created , _giftcard_generate_options($res->id));
-
-//     }
-//     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'sort-table')));
-//     $output .= theme('pager');
-
-//     return $output;
-
-// }
 
 
 
@@ -514,6 +477,7 @@ $header = array(
              array('data' => t('Service Fee'), 'field' => 'service_fee'),
              array('data' => t('Status'), 'field' => 'status'),
              array('data' => t('Created'), 'field' => 'created', 'sort' => 'asc'),
+             array('data' => t('Create by')),
              array('data' => t('Publish')),
              array('data' => t('Actions'), ),
            );
@@ -633,8 +597,11 @@ $query = db_select('giftcard', 'g');
 
     $query->fields('g', array('id', 'code', 'original_value','balance_value','client','start_date','end_date','service_fee','status',"created","state"));
     $query->addField("u" , "name");
+    $query->addField("u2" , "name",'creatername');
+    $query->addField("u2" , "uid",'createrid');
     // $query->addExpression("CONCAT(g.code, '-', g.id)", 'codefull');
     $query->leftjoin("users" , "u" , "u.uid = g.client");
+    $query->leftjoin("users" , "u2" , "u2.uid = g.user");
     $table_sort = $query->extend('TableSort') // Add table sort extender.
                         ->orderByHeader($header); // Add order by headers.
     if(!is_numeric($limit)){
@@ -706,6 +673,7 @@ $query = db_select('giftcard', 'g');
        
       }
 
+// global $user;
 
       $rows[$res->id] = array($res->id, 
                               $res->code .'-'.$res->id, 
@@ -718,15 +686,11 @@ $query = db_select('giftcard', 'g');
                             "$ ".$res->service_fee,
                             $status_label , 
                             $res->created , 
+                            "<a href='/user/".$res->createrid."'>".$res->creatername."</a>" , 
                             $state_label , 
                             _giftcard_generate_options($res->id));
 
     }
-
-// global $pager_page_array, $pager_total, $pager_total_items, $pager_limits;
-// dsm($pager_total_items);
-// dsm($pager_limits);
-// $form['tablecount'] = array('#markup' => $result->rowCount());
 
 
 $form['table'] = array(
@@ -1247,6 +1211,12 @@ $body = <<<EOD
 <div class="data"><span style="font-weight:bold">Product Name : </span>{$node->title}<br></div>
 <div class="data"><span style="font-weight:bold">Product Url : </span><a href="{$base_url}/node/{$node->nid}">{$base_url}/node/{$node->nid}</a></div>
 </div>
+<br> <br>  
+Best Regards,<br> <br>  
+Client Services <br>  
+<a href="http://www.dealcountry.com">www.dealcountry.com</a><br>
+<img src="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png" alt="" width="140">
+Come Tour all the great deals! 
 EOD;
 
     $params = array(
@@ -1264,7 +1234,8 @@ Thank you for using your dealcountry.com gift card! Your request will be process
 <br>  <br>  
 Best Regards,<br> <br>  
 Client Services <br>  
-<a href="www.dealcountry.com">www.dealcountry.com</a><br> 
+<a href="http://www.dealcountry.com">www.dealcountry.com</a><br>
+<img src="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png" alt="">
 Come Tour all the great deals! 
  
 EOD;
@@ -1850,16 +1821,7 @@ $query = db_select('orders', 'o');
 
     $result = $pager->execute();
 
-            // array('data' => t('ID'), 'field' => 'id', 'sort' => 'asc'), // sort
-            //  array('data' => t('Offer'), 'field' => 'title'),
-            //  array('data' => t('Code'), 'field' => 'code'),
-            //  array('data' => t('User'), 'field' => 'name'),
-            //  array('data' => t('Balance value'), 'field' => 'balance_value'),
-            //  array('data' => t('Charge'), 'field' => 'charge'),
-            //  array('data' => t('Order Details'), 'field' => 'order_details'),
-            //  array('data' => t('Created'), 'field' => 'created'),
-            //  array('data' => t('Status'), 'field' => 'status'),
-            //  array('data' => t('Actions'), ),
+            
 
     $rows = array();
     foreach($result as $res){
@@ -1875,7 +1837,9 @@ $query = db_select('orders', 'o');
           break;
 }
       $rows[$res->id] = array($res->id, 
-                              $res->title,
+                              // $res->title,
+                              "<a href='/admin/giftcard/orders/view/".$res->id."'>".$res->title."</a>",
+                              // $res->title,
                               $res->code, 
                               $res->name ,
                               // $res->balance_value,
@@ -2127,9 +2091,9 @@ $html = <<<EOD
     </div>
     <div class="row">
         <span class="label"><b>Gift card:</b></span>
-        <span class="text">{$order->code}</span>
+        <span class="text">{$order->code}-{$order->idgiftcard}</span>
     </div>
-    <div class="row">
+    <div class="row" style="font-size: 20px;">
         <span class="label"><b>Gift card balance:</b></span>
         <span class="text">$ {$balance_contable}</span>
     </div>
@@ -2154,6 +2118,11 @@ $form['idorder'] = array(
 $form['balance_value'] = array(
     '#type' => 'hidden',
     '#value' => $order->balance_value,
+  );
+
+$form['balance_contable'] = array(
+    '#type' => 'hidden',
+    '#value' => $balance_contable,
   );
 
 
@@ -2237,7 +2206,10 @@ function giftcard_list_orders_edit_form_validate($form, &$form_state) {
     form_set_error('status', 'This Purchase has been Delivered already.');
   }
 
-
+ //VALIDACION DE QUE EL GIFTCARD TIENE DINERO
+  if($values["balance_contable"] < 1){
+    form_set_error('status', 'The Gift card don\'t have enough money');
+  }
 
   //VALIDAR QUE SHIPPING + TAXES  NO SUPEREN EL BALANCE_VALUE DEL GIFTCARD
   $balance_value_available = giftcard_balance_value_enable($values["idgiftcard"]);
@@ -2249,8 +2221,10 @@ function giftcard_list_orders_edit_form_validate($form, &$form_state) {
 
 
   if( ($shipping + $taxes + $charge + $extra ) > $balance_value_available ){
-    form_set_error('shipping', 'Exceded','extra');
-    form_set_error('taxes', 'Exceded');
+    form_set_error('shipping');
+    form_set_error('Exceded');
+    form_set_error('extra');
+    form_set_error('taxes');
     drupal_set_message(t("The Gift card don't have enough money, "), 'error', FALSE);
   }
 
@@ -3326,18 +3300,31 @@ $form['filter'] = array(
   '#title' => t('Recipient Info:')
 );
 
+
+$form['filter']['username'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Your Name:'),
+          '#required' => TRUE,
+          '#default_value'=>$user->name,
+          //'#attributes' => array('class'=>array('part2'),'placeholder'=>array('..-.......-....')),
+
+        );
+
+
 $form['filter']['name'] = array(
           '#type' => 'textfield',
-          '#title' => t('Name:'),
-          '#required' => TRUE,
+          '#title' => t('Friend\'s Name:'),
+          // '#required' => TRUE,
           '#default_value'=>"",
           //'#attributes' => array('class'=>array('part2'),'placeholder'=>array('..-.......-....')),
 
         );
+
+
 $form['filter']['email'] = array(
           '#type' => 'textfield',
-          '#title' => t('E-mail:'),
-          '#required' => TRUE,
+          '#title' => t('Friend\'s E-mail:'),
+          // '#required' => TRUE,
           // '#default_value'=>"5.00",
           //'#attributes' => array('class'=>array('part3'),'placeholder'=>array('$5.00 is the minimum charge required')),
 
@@ -3412,6 +3399,11 @@ function giftcard_page_send_egiftcard_form_submit($form, &$form_state){
 
 global $user;
 // GENERAR INVOICEORDER
+
+//ACTUALIZAR DATOS DE USUARIO
+$account = user_load($user->uid);
+user_save($account, array("name"=>$form_state["values"]['username']));
+
 $idtransaction = db_insert('transaction') // Table name no longer needs {}
           ->fields(array(
             'idgiftcard' => 0,
@@ -3667,7 +3659,13 @@ $eg = $rs->fetchObject();
     //$from = 'noreply@dealcountry.com';
     $params = array(
     'subject' => 'DealCountry : E-GIFTCARD has been bought',
-    'body' => "A E-Gift Card has been bought. Code ".$eg->code."-".$eg->id,
+    'body' => "A E-Gift Card has been bought. Code ".$eg->code."-".$eg->id. '<br /> <br />  
+Best Regards,<br> <br>  
+Client Services <br>  
+<a href="http://www.dealcountry.com">www.dealcountry.com</a><br>
+<img src="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png" alt="" width="140">
+Come Tour all the great deals! 
+    ',
     // 'gifcard'=>$values["giftcard"],
     );
     drupal_mail('giftcard', 'orders', $to, language_default(), $params, $from, TRUE);
