@@ -49,29 +49,72 @@ jQuery().ready(function(){
     .parent()
     .hide();
 
+    jQuery(".page-giftcard-order .form-item-combine")
+    .hide()
+
+
+
     //VALIDANDO LUEGO DEL SUBMIT
     var select = jQuery(".page-giftcard-order #edit-codefull").val();
+    var combine = jQuery(".page-giftcard-order .form-item-combine");
+
+
     if(select == "new"){
+    	//MUESTRA ELCAMPO NEWGIFTCARD
     	jQuery(".page-giftcard-order #edit-giftcard")
 	    .parent()
 	    .show();
+	    //OCULTA EL CAMPO COMBINE
+        combine.hide();
+
+    }else if(select == "combine"){
+
+        jQuery("#edit-giftcard")
+        .val('')
+        .parent()
+        .hide();
+
+        combine.show();
+    	jQuery("#edit-codefull").trigger("change");
+
+
     }else{
-    	jQuery("#edit-codefull").trigger("change")
+
+    	jQuery("#edit-codefull").trigger("change");
+        combine.hide();
+
     }
 
     jQuery(".page-giftcard-order #edit-codefull")
     .change(function(){ 
-      // jQuery("#edit-giftcard").val(jQuery(this).val());
-      if(jQuery(this).val() == 'new'){
+    	var el = jQuery(this); 
+    	var combine = jQuery(".page-giftcard-order .form-item-combine");
+
+      if(el.val() == 'new'){
         jQuery("#edit-giftcard")
         .val('')
         .parent()
         .show('slow');
+
+        combine.hide();
+
+      }else if(el.val() == "combine"){
+        jQuery("#edit-giftcard")
+        .val('')
+        .parent()
+        .hide();
+
+        combine.show("slow");
+
+
       }else{
         jQuery("#edit-giftcard")
         .val('')
         .parent()
         .hide('slow');
+        combine.hide();
+
+
       }
     });
     
