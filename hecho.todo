@@ -1,9 +1,9 @@
 Cambios a realizar en produccion :
   ☐ quitar colorbox en http://dealcountry.dev/admin/structure/ds/fields/manage_custom/gifcard_link
-  ☐ Subir tablas giftcard , detail , order , transaction
-  ☐ Modulo giftcard
-  ☐ agregar path giftcard al contexto http://dealcountry.dev/admin/structure/context/list/deals-list/edit
-  ☐  agregar context a menu myaccount http://dealcountry.dev/admin/structure/context/list/myaccount/edit
-  ☐ crear menu my account
-  ☐ Instalar modulo mimehtml
-  ☐ actualizar imagenes del tema
+  ✔ Subir tablas giftcard , detail , order , transaction @done (14-06-13 16:47)
+  ✔ Modulo giftcard @done (14-06-13 16:47)
+  ✔ agregar path giftcard al contexto http://dealcountry.dev/admin/structure/context/list/deals-list/edit @done (14-06-13 17:02)
+  ✔  agregar context a menu myaccount http://dealcountry.dev/admin/structure/context/list/myaccount/edit @done (14-06-13 17:02)
+  ✔ crear menu my account @done (14-06-13 17:02)
+  ✔ Instalar modulo mimehtml @done (14-06-13 17:06)
+  ✔ actualizar imagenes del tema @done (14-06-13 17:06)
