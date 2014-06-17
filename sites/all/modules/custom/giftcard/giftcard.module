@@ -1156,7 +1156,7 @@ function giftcard_validate_codefull( $codefull , $uid , $nid ){
     
 
 		if ($price > $balance_value) {
-			return array("validate"=>FALSE , "message"=>"The value of the deal selected exceeds the value of your Gift Card. Please <a href='/myaccount/addfunds?pendent_order=$nid'>click here to add funds</a> to your Gift Card. <br> Your Gift Card balance is $ ".$balance_value, "alert"=>$alert );
+			return array("validate"=>FALSE , "message"=>"The value of the deal selected exceeds the value of your Gift Card. Please <a href='/myaccount/addfunds?pendent_order=$nid'>click here to add funds</a> to your Gift Card.  Your Gift Card balance is $ ".$balance_value, "alert"=>$alert );
       
 		}else{
 			
