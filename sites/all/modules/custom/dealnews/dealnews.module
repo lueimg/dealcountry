@@ -1,0 +1,118 @@
+<?php
+
+
+function dealnews_permission() {
+  return array(
+    'administer dealnews' => array(
+      'title' => t('Administer Gift Card newsletter'),
+      'description' => t('Perform administration tasks for Gift Card newsletter.'),
+    ),
+  );
+}
+
+
+function dealnews_menu() {
+  $items = array(); 
+
+  $items['admin/dealnews/settings'] = array( 
+    'title' => t('Deal news Settings '), 
+    'description' => '', 
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('deal_news_settings_form'),
+    'access arguments' => array("administer giftcard"),
+    'type' =>  MENU_NORMAL_ITEM,
+  );
+
+  $items['dealnews/generatenewsletter'] = array( 
+    'title' => t('Newsletter'), 
+    'description' => '', 
+     'page callback' => 'dealnews_ejecutar_generar_html',
+    'access arguments' => array('access content'),
+    'type' =>  MENU_CALLBACK,
+  );
+
+
+  return $items; 
+
+}
+
+/* 
+* Formulario para configuracion de envio de newsletter
+*/
+function deal_news_settings_form($node, &$form_state){
+
+}
+
+
+/*
+* Generacion de html para guardado como nodo newsletter
+*/
+
+function dealnews_Generar_html_newsletter(){
+	
+	//OBTENER LOS ULTIMOS 
+	// 8 DE PRODUCTOS
+	// 8 DE GATEWAY
+
+
+
+	//OBTENER EL HTML TEMPALTE
+	global $base_url;
+	  $url = $base_url . '/sites/all/modules/custom/dealnews/dealnews.tpl.php';
+	  $tpl = file_get_contents($url);
+
+
+	$variables['[user_name]'] = $user->name;
+
+    $body = str_replace(array_keys($variables),array_values($variables),$tpl);
+
+	//GENERAR EL NODO
+      $node = new stdClass();
+	  $node->title = "YOUR TITLE";
+	  $node->type = "simplenews";
+	  node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+	  $node->language = 'en'; // Or e.g. 'en' if locale is enabled
+	  $node->uid = 1;
+	  $node->status = 1; //(1 or 0): published or not
+
+	  $node->body = $body;
+	  $node = node_submit($node); // Prepare node for saving
+	  node_save($node);
+
+
+
+
+}
+
+/*
+* FUNCTION PARA GENERAR EL HTML Y ENVIARLO POR CRON
+*/
+
+function dealnews_ejecutar_generar_html(){
+// AUTOMATICAMENTE ENVIARA EL NEWSLETTER
+
+	//Genera y creal el newsletter nodo
+	dealnews_Generar_html_newsletter();
+
+	//Ejecuta el cron
+	//drupal_cron_run();
+
+	
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
