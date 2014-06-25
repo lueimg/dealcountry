@@ -14,7 +14,7 @@ function dealnews_permission() {
 function dealnews_menu() {
   $items = array(); 
 
-  $items['admin/dealnews/settings'] = array( 
+  $items['admin/config/dealnews/settings'] = array( 
     'title' => t('Deal news Settings '), 
     'description' => '', 
     'page callback' => 'drupal_get_form',
@@ -30,6 +30,13 @@ function dealnews_menu() {
     'access arguments' => array('access content'),
     'type' =>  MENU_CALLBACK,
   );
+   $items['node/%/dealnews'] = array( 
+    'title' => t('Newsletter'), 
+    'description' => '', 
+     'page callback' => 'dealnews_node',
+    'access arguments' => array('access content'),
+    'type' =>  MENU_CALLBACK,
+  );
 
 
   return $items; 
@@ -41,6 +48,30 @@ function dealnews_menu() {
 */
 function deal_news_settings_form($node, &$form_state){
 
+$form['opciones'] = array(
+  '#type' => 'select',
+  '#title' => t('After'),
+  '#options' => array(
+          1 => t('1 day'),
+          2 => t('2 days'),
+          3 => t('3 days'),
+       ),
+  '#default_value'=>variable_get('dealnews_days', 1),
+);
+
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+  );
+  return $form;
+
+
+}
+
+function deal_news_settings_form_submit($node, &$form_state){
+	drupal_set_message(t("Setting has been updated!"), 'status', FALSE);
+	variable_set('dealnews_days', $form_state['values']['opciones']);
 }
 
 
@@ -50,38 +81,90 @@ function deal_news_settings_form($node, &$form_state){
 
 function dealnews_Generar_html_newsletter(){
 	
-	//OBTENER LOS ULTIMOS 
-	// 8 DE PRODUCTOS
-	// 8 DE GATEWAY
-
-
-
 	//OBTENER EL HTML TEMPALTE
-	global $base_url;
-	  $url = $base_url . '/sites/all/modules/custom/dealnews/dealnews.tpl.php';
+	  global $base_url;
+	  $url = $base_url . '/sites/all/modules/custom/dealnews/dealnews.tpl.html';
 	  $tpl = file_get_contents($url);
 
+	  $image = '';
+	//OBTENER LOS ULTIMOS 
 
-	$variables['[user_name]'] = $user->name;
+	// gateway
+	$sql = "
+SELECT node.title AS node_title, node.nid AS nid, node.created AS node_created, 'node' AS field_data_field_deal_image_thumb_node_entity_type
+FROM 
+{node} node
+INNER JOIN {field_data_field_deal_categories} field_data_field_deal_categories ON node.nid = field_data_field_deal_categories.entity_id AND (field_data_field_deal_categories.entity_type = 'node' AND field_data_field_deal_categories.deleted = '0')
+WHERE (( (node.status = '1') AND (node.type IN  ('deal')) AND (field_data_field_deal_categories.field_deal_categories_tid IN  ('3', '27')) ))
+ORDER BY node_created DESC
+LIMIT 8 ";
+
+	
+	$variables['{{listado_gateway}}'] = dealnews_generar_listado($sql);
+	
+
+
+
+	$sql = "SELECT node.title AS node_title, node.nid AS nid, node.created AS node_created
+FROM 
+{node} node
+INNER JOIN {field_data_field_deal_categories} field_data_field_deal_categories ON node.nid = field_data_field_deal_categories.entity_id AND (field_data_field_deal_categories.entity_type = 'node' AND field_data_field_deal_categories.deleted = '0')
+WHERE (( (node.status = '1') AND (node.type IN  ('deal')) AND (field_data_field_deal_categories.field_deal_categories_tid IN  ('2', '11', '12', '13', '15', '16', '17', '18', '19')) ))
+ORDER BY node_created DESC
+LIMIT 16";
+	
+	$variables['{{listado_products}}'] = dealnews_generar_listado($sql);
+	
+
+	$variables['{{logo}}'] = 
+	'<img src="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png" alt="" width="190">';
 
     $body = str_replace(array_keys($variables),array_values($variables),$tpl);
 
 	//GENERAR EL NODO
       $node = new stdClass();
-	  $node->title = "YOUR TITLE";
+	  $node->title = "news-".date("Y-m-d H:i:s");
 	  $node->type = "simplenews";
 	  node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
 	  $node->language = 'en'; // Or e.g. 'en' if locale is enabled
 	  $node->uid = 1;
 	  $node->status = 1; //(1 or 0): published or not
-
-	  $node->body = $body;
+	  $node->field_simplenews_term['und'][0]['tid'] = 28;
+	  $node->body['und'][0]['value'] = $body;
+	  // $node->body['und'][0]['safe_value'] = $body;
+	  $node->body['und'][0]['format'] = 'ds_code';
 	  $node = node_submit($node); // Prepare node for saving
 	  node_save($node);
 
 
 
 
+}
+
+/*
+* genera el listado dentro del newsletter
+*/
+function dealnews_generar_listado($sql){
+$rs = db_query($sql);
+	$result = $rs->fetchAll();
+	$listado = "";
+
+	$image = "";
+	foreach($result as $row){
+
+		//GENERANDO IMAGEN
+		$deal = node_load($row->nid);
+		$uri = $deal->field_deal_image_thumb['und'][0]['uri'];
+		$image = "<img src=\"". image_style_url("img_270x130", $uri)."\" />";
+
+		$listado 
+				.="<div style=\"width:45%;display: inline-block; margin-left:20px;\">"
+					.$image
+					."<div style='background:#EAEAEA'> <a href='".$base_url."/node/".$row->nid."'>". $row->node_title ." </a></div>"
+				."</div>";
+	}
+
+return $listado;
 }
 
 /*
@@ -101,7 +184,24 @@ function dealnews_ejecutar_generar_html(){
 
 }
 
+/*
+	function que muestra el html del newsletter creado
+*/
+function dealnews_node(){
 
+$arg = arg(1);
+
+if(is_numeric($arg)){
+
+$nodo = node_load($arg);
+
+
+print $nodo->body['und'][0]['value'];
+
+}
+
+
+}
 
 
 

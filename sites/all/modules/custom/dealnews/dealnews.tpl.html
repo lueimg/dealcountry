@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+</head>
+<body>
+<table width="600px" style="font-family: arial;">
+    <!-- cabecera -->
+	<tr>
+		<td>
+			<table width="100%">
+				<tr>
+					<td>{{logo}}</td>
+					<td style="color: #BD0318; text-align: right;font-size: 1.5em;padding: 5px 0">Come tour all the great deals!</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<!-- menu negro -->
+	<tr style="background:#2D2D2D;color: #fff;text-align: center; font-size: 1em;padding:10px 20px">
+		<td style="padding: 10px 20px">
+			| <a style="color: #fff; text-decoration: none;" href="http://www.dealcountry.com/deals/local">LOCAL DEALS</a> 
+			| <a style="color: #fff; text-decoration: none;" href="http://www.dealcountry.com/deals/products">PRODUCTS</a> 
+			| <a style="color: #fff; text-decoration: none;" href="http://www.dealcountry.com/deals/getaways">GATEWAY</a> |
+		</td>
+	</tr>
+	<!-- TITULO GATEWAY -->
+	<tr style="background: #EAEAEA; color: #BD0318; font-weight: bold;text-transform: uppercase;">
+		<td style="padding: 10px 20px">GATEWAYS</td>
+	</tr>
+	<!-- LISTADO GATEWAY -->
+	<tr>
+		<td style="padding: 20px 0">
+			{{listado_gateway}}
+			<div style="background: #BD0318; color: #fff;padding: 8px 20px;text-align: right;margin: 20px">
+				<a style="color: #fff;text-decoration: none;"  href="http://www.dealcountry.com/deals/getaways">VIEW ALL GATEWAY DEALS</a>
+			</div>
+		</td>
+	</tr>
+	<!-- TITULO PRODUCTS -->
+	<tr style="background: #EAEAEA; color: #BD0318; font-weight: bold;text-transform: uppercase;">
+		<td style="padding: 10px 20px">PRODUCTS</td>
+	</tr>
+	<!-- LISTADO PRODUCTS -->
+	<tr>
+		<td  style="padding: 20px 0">
+			{{listado_products}}
+			<div style="background: #BD0318; color: #fff;padding: 8px 20px;text-align: right;margin: 20px">
+				<a style="color: #fff;text-decoration: none;" href="http://www.dealcountry.com/deals/products">VIEW ALL PRODUCTS DEALS</a>
+			</div>
+		</td>
+	</tr>
+</table>
+	
+</body>
+</html>
