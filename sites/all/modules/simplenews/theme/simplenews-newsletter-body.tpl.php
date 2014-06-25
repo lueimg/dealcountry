@@ -27,5 +27,6 @@
  * @see template_preprocess_simplenews_newsletter_body()
  */
 ?>
-<h2><?php print $title; ?></h2>
-<?php print render($build); ?>
+<!-- <h2><?php print $title; ?></h2> -->
+<?php  print render($build); ?>
+<?php //print $build['#node']->body['und'][0]['value'] ?>

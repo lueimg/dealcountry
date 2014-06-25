@@ -145,6 +145,7 @@ LIMIT 16";
 * genera el listado dentro del newsletter
 */
 function dealnews_generar_listado($sql){
+	global $base_url;
 $rs = db_query($sql);
 	$result = $rs->fetchAll();
 	$listado = "";
@@ -161,8 +162,7 @@ $rs = db_query($sql);
 				.="<div style=\"width:45%;display: inline-block; margin-left:20px;vertical-align: top;\">"
 					.$image
 					."<div style='background:#EAEAEA;height: 70px;padding: 10px;margin-bottom: 20px;'>
-						 <a style='text-decoration:none; color:#444;'
-						  href='".$base_url."/node/".$row->nid."'>". $row->node_title ." </a></div>"
+						 <a style='text-decoration:none; color:#444;' href='".$base_url."/node/".$row->nid."'>". $row->node_title ." </a></div>"
 				."</div>";
 	}
 
