@@ -1084,7 +1084,7 @@ $body = <<<EOD
 Best Regards,<br> <br>  
 Client Services <br>  
 <a href="http://www.dealcountry.com">www.dealcountry.com</a><br>
-<img src="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png" alt="" width="140"><br>  
+<img src="http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png" alt="" width="140"><br>  
 Come Tour all the great deals! 
 EOD;
 
@@ -1365,7 +1365,7 @@ $body = <<<EOD
 Best Regards,<br> <br>  
 Client Services <br>  
 <a href="http://www.dealcountry.com">www.dealcountry.com</a><br>
-<img src="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png" alt="" width="140"><br>  
+<img src="http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png" alt="" width="140"><br>  
 Come Tour all the great deals! 
 EOD;
 
@@ -1395,7 +1395,7 @@ Thank you for using your dealcountry.com Gift Card! Your request will be process
 Best Regards,<br> <br>  
 Client Services <br>  
 <a href="http://www.dealcountry.com">www.dealcountry.com</a><br>
-<img src="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png" alt=""><br>    
+<img src="http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png" alt=""><br>    
 Come Tour all the great deals! 
  
 EOD;
@@ -1589,7 +1589,7 @@ $header = array(
     $header = array(
              array('data' => t('')), // sort
              array('data' => t('Gift Card Number'), 'field' => 'idgiftcard'),
-             array('data' => t('Transaction Date'), 'field' => 'created'),
+             array('data' => t('Transaction Date'), 'field' => 'created' , 'sort' => 'desc'),
              array('data' => t('Funds Added'), 'field' => 'charge'),
              
            );
@@ -1603,10 +1603,11 @@ $header = array(
     $query->leftjoin("giftcard" , 'g', 'g.id = t.idgiftcard');
     $query->condition("t.client" , $user->uid , "=");
     $query->condition("t.status" , 1 , "=");
+    $query->orderBy('t.id',"desc");
     $table_sort = $query->extend('TableSort') // Add table sort extender.
                         ->orderByHeader($header); // Add order by headers.
     $pager = $table_sort->extend('PagerDefault')
-                        ->limit(15); // 5 rows per page.
+                        ->limit(8); // 5 rows per page.
     $result = $pager->execute();
 
     $rows = array();
@@ -1872,15 +1873,21 @@ $html= <<<EOD
 <input type='hidden' name="x_fp_timestamp" value="{$fp_timestamp}" />
 <input type='hidden' name="x_fp_sequence" value="{$fp_sequence}" />
 <input type='hidden' name="x_invoice_num" value="{$fp_sequence}" />
-<INPUT TYPE=HIDDEN NAME="x_description" VALUE="Product or order description.">
+<INPUT TYPE=HIDDEN NAME="x_description" VALUE="Add funds to Gift Card.">
 <input type='hidden' name="x_version" value="3.1">
 <input type='hidden' name="x_method" value="cc">
 <input type='hidden' name="x_show_form" value="payment_form">
-<input type='hidden' name="x_test_request" value="true" />
 <INPUT TYPE=HIDDEN NAME="x_cust_id" VALUE="{$user->uid}">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_method" VALUE="POST">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_text" VALUE="Click here to return to our home page">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="{$base_url}/myaccount/fundsreceipt">
+<INPUT TYPE=HIDDEN NAME="x_header_html_payment_form" VALUE="Payment Gateway<style>
+#divMerchantHeader{background:#f5f5f5; color:#97310e;margin-top: 15px;}
+#divPage{background:#fff;}</style>">
+<INPUT TYPE=HIDDEN NAME="x_color_background" VALUE="#E3E9F1">
+<INPUT TYPE=HIDDEN NAME="x_logo_url" VALUE="http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png">
+<INPUT TYPE=HIDDEN NAME="x_cancel_url" VALUE="http://www.dealcountry.com/myaccount">
+<INPUT TYPE=HIDDEN NAME="x_cancel_url_text" VALUE="Return to Dealcountry">
 <input type='submit' value="Click here for the secure payment form">
 </form>
 <script>
@@ -3763,21 +3770,36 @@ $html= <<<EOD
 <input type='hidden' name="x_fp_timestamp" value="{$fp_timestamp}" />
 <input type='hidden' name="x_fp_sequence" value="{$fp_sequence}" />
 <input type='hidden' name="x_invoice_num" value="{$fp_sequence}" />
-<INPUT TYPE=HIDDEN NAME="x_description" VALUE="Product or order description.">
+<INPUT TYPE=HIDDEN NAME="x_description" VALUE="Send e-Gift Cards.">
 <input type='hidden' name="x_version" value="3.1">
 <input type='hidden' name="x_method" value="cc">
 <input type='hidden' name="x_show_form" value="payment_form">
-<input type='hidden' name="x_test_request" value="true" />
 <INPUT TYPE=HIDDEN NAME="x_cust_id" VALUE="{$user->uid}">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_method" VALUE="POST">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_text" VALUE="Click here to return to our home page">
 <INPUT TYPE=HIDDEN NAME="x_receipt_link_URL" VALUE="{$base_url}/myaccount/fundsreceipt">
+
+<INPUT TYPE=HIDDEN NAME="x_header_html_payment_form" VALUE="Payment Gateway<style>
+#divMerchantHeader{background:#f5f5f5; color:#97310e;margin-top: 15px;}
+#divPage{background:#fff;}</style>">
+<INPUT TYPE=HIDDEN NAME="x_color_background" VALUE="#E3E9F1">
+<INPUT TYPE=HIDDEN NAME="x_logo_url" VALUE="http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png">
+<INPUT TYPE=HIDDEN NAME="x_cancel_url" VALUE="http://www.dealcountry.com/myaccount">
+<INPUT TYPE=HIDDEN NAME="x_cancel_url_text" VALUE="Return to Dealcountry">
+
+
 <input type='submit' value="Click here for the secure payment form">
 </form>
 <script>
   jQuery('#frm-addfunds').submit();
 </script>
 EOD;
+
+// <INPUT TYPE=HIDDEN NAME="x_header_html_payment_form" VALUE="x_header_html_payment_form">
+// <INPUT TYPE=HIDDEN NAME="x_footer_html_payment_form" VALUE="x_footer_html_ payment_form">
+// <INPUT TYPE=HIDDEN NAME="x_header2_html_payment_form" VALUE="x_header2_html_payment_form">
+// <INPUT TYPE=HIDDEN NAME="x_footer2_html_payment_form" VALUE="x_footer2_html_payment_form">
+// <INPUT TYPE=HIDDEN NAME="x_color_background" VALUE="#E3E9F1">
 
 unset($_SESSION['transaction']);
 return $html;
@@ -3920,14 +3942,14 @@ $eg = $rs->fetchObject();
 
    //$tpl = file_get_contents('egiftcard-cliente.html');
     //DATOS DE LA VARIANTE A COMPRAR
-    $variables['[LOGO]'] ="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png";
+    $variables['[LOGO]'] ="http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png";
     $variables['[cliente_nombre]'] = $eg->name;
     $variables['[cliente_descripcion]'] = $eg->message;
     $variables['[cliente_email]'] = $eg->email;
     $variables['[cliente_tarjeta]'] = _giftcard_get_url_card($eg->type);
-    $variables['[imagen_separacion_inicio]'] =  "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/adorno-up.jpg";
-    $variables['[imagen_separacion_final]'] = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/adorno-down.jpg";
-    $variables['[imagen_carita]'] = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/gift-smile.gif";
+    $variables['[imagen_separacion_inicio]'] =  "http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/adorno-up.jpg";
+    $variables['[imagen_separacion_final]'] = "http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/adorno-down.jpg";
+    $variables['[imagen_carita]'] = "http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/gift-smile.gif";
     $variables['[user_name]'] = $user->name;
 
     $body = str_replace(array_keys($variables),array_values($variables),$tpl);
@@ -3970,7 +3992,7 @@ $eg = $rs->fetchObject();
 Best Regards,<br> <br>  
 Client Services <br>  
 <a href="http://www.dealcountry.com">www.dealcountry.com</a><br>
-<img src="http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png" alt="" width="140">
+<img src="http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/logosmall.png" alt="" width="140">
 <br />    
 Come Tour all the great deals! 
     ',
@@ -4021,32 +4043,32 @@ global $base_url;
 
   switch ($type) {
     case '1':
-      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-thinking-of-you.jpg";
+      $url = "http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/GC-thinking-of-you.jpg";
       break;
     case '2':
-      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-thinking-about-you.jpg";
+      $url = "http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/GC-thinking-about-you.jpg";
       break;
     case '3':
-      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-happy-birthday.jpg";
+      $url = "http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/GC-happy-birthday.jpg";
       break;
     case '4':
-      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-congratulations.jpg";
+      $url = "http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/GC-congratulations.jpg";
       break;
     case '5':
-      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-thinking-you.jpg";
+      $url = "http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/GC-thinking-you.jpg";
       break;
     case '6':
-      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-happy-fathers-day.jpg";
+      $url = "http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/GC-happy-fathers-day.jpg";
       break;
     case '7':
-      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-merry-christmas.jpg";
+      $url = "http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/GC-merry-christmas.jpg";
       break;
     case '8':
-      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-happy-new-year.jpg";
+      $url = "http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/GC-happy-new-year.jpg";
       break;
     
     default:
-      $url = "http://www.hispaneros.com/sites/all/themes/bootstrap_dealcountry/images/GC-thinking-of-you.jpg";
+      $url = "http://www.dealcountry.com/sites/all/themes/bootstrap_dealcountry/images/GC-thinking-of-you.jpg";
       break;
   }
 

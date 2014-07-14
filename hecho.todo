@@ -7,3 +7,9 @@ Cambios a realizar en produccion :
   ✔ crear menu my account @done (14-06-13 17:02)
   ✔ Instalar modulo mimehtml @done (14-06-13 17:06)
   ✔ actualizar imagenes del tema @done (14-06-13 17:06)
+
+
+Para salir a proudccion :
+  ☐ 1. http://dealcountry.dev/admin/structure/ds/fields/manage_custom/gifcard_link
+  ☐ 2. http://dealcountry.dev/admin/structure/context/list/myaccount/edit
+  ☐ 3. http://dealcountry.dev/admin/structure/context/list/deals-list/edit

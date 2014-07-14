@@ -14,13 +14,13 @@ function dealnews_permission() {
 function dealnews_menu() {
   $items = array(); 
 
-  $items['admin/config/dealnews/settings'] = array( 
-    'title' => t('Deal news Settings '), 
+  $items['admin/config/services/simplenews/programsend'] = array( 
+    'title' => t('Deal news Programming Send '), 
     'description' => '', 
     'page callback' => 'drupal_get_form',
     'page arguments' => array('deal_news_settings_form'),
     'access arguments' => array("administer giftcard"),
-    'type' =>  MENU_NORMAL_ITEM,
+    'type' =>  MENU_LOCAL_TASK,
   );
 
   $items['dealnews/generatenewsletter'] = array( 
@@ -50,7 +50,7 @@ function deal_news_settings_form($node, &$form_state){
 
 $form['opciones'] = array(
   '#type' => 'select',
-  '#title' => t('After'),
+  '#title' => t('Send After:'),
   '#options' => array(
           1 => t('1 day'),
           2 => t('2 days'),
@@ -137,6 +137,8 @@ LIMIT 16";
 	  node_save($node);
 
 
+	  //GUARDAMOS ULTIMA FECHA DE CREACION
+	  variable_set("dealnews_news_created",date("Y-m-d"));
 
 
 }
@@ -155,7 +157,7 @@ $rs = db_query($sql);
 
 		//GENERANDO IMAGEN
 		$deal = node_load($row->nid);
-		$uri = $deal->field_deal_image_thumb['und'][0]['uri'];
+		$uri = $deal->field_deal_image['und'][0]['uri'];
 		$image = "<img src=\"". image_style_url("img_270x130", $uri)."\" />";
 
 		$listado 
@@ -176,11 +178,18 @@ return $listado;
 function dealnews_ejecutar_generar_html(){
 // AUTOMATICAMENTE ENVIARA EL NEWSLETTER
 
-	//Genera y creal el newsletter nodo
-	dealnews_Generar_html_newsletter();
+$crear = validar_creacion_newsletter();
 
-	//Ejecuta el cron
-	//drupal_cron_run();
+//TESTTING
+$crear = true;
+
+	if($crear){
+		//Genera y creal el newsletter nodo
+		dealnews_Generar_html_newsletter();
+
+	}
+	
+
 
 	
 
@@ -206,7 +215,21 @@ print $nodo->body['und'][0]['value'];
 }
 
 
+function validar_creacion_newsletter(){
 
+	$ultima_fecha_creada = strtotime(variable_get("dealnews_news_created",date("Y-m-d")));
+	$rango_dias = variable_get('dealnews_days', 1);
+	$hoy = $fecha = strtotime(date("Y-m-d"));
+
+	$siguiente_fecha =  strtotime ( '+'.$rango_dias.' days' , $ultima_fecha_creada ) ;
+
+	if( $siguiente_fecha <= $hoy ){
+		return true;
+	}else
+		return false;
+
+
+}
 
 
 
