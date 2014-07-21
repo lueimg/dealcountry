@@ -2715,7 +2715,9 @@ if($form_state['clicked_button']["#value"] == "Delete"){
 
     $new_amount = abs($amount - $balance_value);
     db_query('update giftcard set balance_value = '.$amount.' , service_fee = '.$service_fee.' , status = '.$status.' where id ='.$idgiftcard);
-    giftcard_register_detail($idgiftcard , $type  = 9, $description  = 'Administrator changed the balance value '.$comment , $charge  = $new_amount, $idorder = 0   );
+
+    giftcard_register_detail($idgiftcard , $type  = 9, 
+      $description  = 'Administrator changed the balance value <br> <b>Comment:</b> '.$comment , $charge  = $new_amount, $idorder = 0   );
   drupal_set_message(t("The purchase has been updated."), 'status', FALSE);
   drupal_goto("admin/giftcard");
 
