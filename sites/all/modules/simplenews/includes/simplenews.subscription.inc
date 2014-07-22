@@ -120,7 +120,7 @@ function simplenews_block_form($form, &$form_state, $tid) {
   global $user;
   $form = array();
 
-  $submit_text = t('Subscribe');
+  $submit_text = t('Go');
   if ($user->uid) {
     if (simplenews_user_is_subscribed($user->mail, $tid)) {
       $submit_text = t('Unsubscribe');

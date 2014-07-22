@@ -34,7 +34,11 @@
   <?php if ($message): ?>
     <p><?php print $message; ?></p>
   <?php endif; ?>
-
+<p>
+  <span class="text gris m sigup">Sign up</span>
+  <span class="text gris s forus">for our</span>
+  <span class="text rojo m news">NEWSLETTER</span>
+</p>
   <?php if ($use_form): ?>
     <?php print render($form); ?>
   <?php elseif ($subscription_link): ?>
