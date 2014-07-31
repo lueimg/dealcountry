@@ -181,7 +181,7 @@ function dealnews_ejecutar_generar_html(){
 $crear = validar_creacion_newsletter();
 
 //TESTTING
-$crear = true;
+//$crear = true;
 
 	if($crear){
 		//Genera y creal el newsletter nodo

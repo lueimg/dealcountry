@@ -34,10 +34,16 @@
   <?php if ($message): ?>
     <p><?php print $message; ?></p>
   <?php endif; ?>
+<span class="pretext rojo">Don't miss again on a great deal!</span>
 <p>
+<div class="newsimg">
+  <img src="/sites/all/modules/custom/dealnews/images/bootstrap-united.png" alt="">
+</div>
+<div class="newstext">
   <span class="text gris m sigup">Sign up</span>
   <span class="text gris s forus">for our</span>
   <span class="text rojo m news">NEWSLETTER</span>
+</div>
 </p>
   <?php if ($use_form): ?>
     <?php print render($form); ?>

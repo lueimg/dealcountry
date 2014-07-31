@@ -853,7 +853,9 @@ function giftcard_login(){
   return $page;
 }
 
-
+/*
+formulario de orden de pedido
+*/
 function giftcard_order_form($node, &$form_state){
 
 //validacion de inicio de session
@@ -1051,7 +1053,9 @@ if(!$form_state['values']['agree']){
 
 }
 
-
+/*
+Registro de orden de pedido(frontend)
+*/
 function giftcard_order_form_submit($form, &$form_state) {
   // dsm($form_state);
 global $user;
@@ -1104,15 +1108,15 @@ EOD;
 if($codefull == "new")
   $codefull = $values["giftcard"];
 
-$rs = db_query("select * from giftcard g 
-  where g.state = 1 and g.status = 1 
-  AND CONCAT(code,'-',id) = '".$codefull."'");
+// $rs = db_query("select * from giftcard g where g.state = 1 and g.status = 1 AND CONCAT(code,'-',id) = '".$codefull."'");
+// $giftcard = $rs->fetchObject(); 
+$giftcard = giftcard_load_data($codefull);
 
-$giftcard = $rs->fetchObject(); 
+
 // VALIDAR PEDIDO
 
 // AGREGAR GIFT CARD AL USUARIO
-  $add = giftcard_register_to_user( $codefull , $user->uid );
+  $add = giftcard_register_to_user( $giftcard , $user->uid );
 // DISMINUIR GIFTCARD
   $charge = giftcard_discrease_balance_value( $codefull , $values["nid"] );
 // REGISTRAR PEDIDO Y MOSTRARLO EN LA LISTA
@@ -1137,7 +1141,35 @@ function giftcard_validate_codefull( $codefull , $uid , $nid ){
 		
 		
 		if(!$giftcard){
-			return array("validate"=>FALSE , "message"=>"Sorry, the Gift Card doesn't exists or is invalid", "alert"=>$alert );
+
+      $error  = 0;
+      
+      if(empty($codefull))
+        $error = 1;
+
+      //VALIDACION DE GIFTCARD , PARA CARDS ANTIGUOS QUE NO TIENEN LA ULTIMA NUMERACION
+      list($letra,$code,$id) = explode("-", $codefull);
+
+      $rs = db_query("select *  from giftcard g 
+         where g.state = 1 and g.status = 1 and  code = '".$letra."-".$code."'");
+        // g.start_date <= NOW() and // se quito esta opcion por si se activa a destiempo un giftcard
+        $giftcard = $rs->fetchObject(); 
+      
+      if(!$giftcard)
+        $error = 1;
+
+      
+      if($error)
+			   return array("validate"=>FALSE , "message"=>"Sorry, the Gift Card doesn't exists or is invalid", "alert"=>$alert );
+
+       //VALIDANDO SI EXISTE MAS DE 1 
+      $sql = "select  count(*) cantidad  from giftcard  where code = '$code'";
+      $rs = db_query($sql);
+      $lista = $rs->fetchObject(); 
+
+      if($lista->cantidad > 1 )
+         return array("validate"=>FALSE , "message"=>"Sorry, the Gift Card doesn't exists or is invalid , contact with the administrator.", "alert"=>$alert );
+
 		}
 
 		$alert = "";	
@@ -1188,7 +1220,7 @@ function giftcard_ajax_validate($form, $form_state) {
 	global $user;
 
   $uid = $user->uid;
-	$nid = $form_state['values']['nid'];
+	$nid = $form_state['values']['nid'];// oferta
   $codefull = $form_state['values']['codefull'];
 
   if($codefull == "new"){
@@ -1289,12 +1321,13 @@ function giftcard_register_order($values){
     $codefull = $values['giftcard'];
   }
 
-    $sql = "select *  from giftcard g 
-     where g.state = 1 and g.status = 1  and CONCAT(code,'-',id) = '".$codefull."'";
-    $rs = db_query($sql);
+    // $sql = "select *  from giftcard g 
+    //  where g.state = 1 and g.status = 1  and CONCAT(code,'-',id) = '".$codefull."'";
+    // $rs = db_query($sql);
+    // $giftcard = $rs->fetchObject();  
+	  $giftcard = giftcard_load_data($codefull);  
 
 
-	$giftcard = $rs->fetchObject();  
   if(empty($giftcard)){
     drupal_set_message(t("We have a problem with your Gift Card number, $codefull"), 'status', FALSE);
     drupal_goto("node/".$values['nid']);
@@ -1414,15 +1447,16 @@ EOD;
 }
 
 /*
- * $code is giftcardcode + id
+ * Registra al giftcard a un usuario
  */
-function giftcard_register_to_user( $code , $uid ){
+function giftcard_register_to_user( $giftcard , $uid ){
 
 	// VALIDAR QUE EXISTA
 	 // $rs = db_query("select * from giftcard g where g.state = 1 and g.status = 1 and g.end_date >= NOW() AND g.code = '".$code."'");
-		  $rs = db_query("select *  from giftcard g 
-     where g.state = 1 and g.status = 1 and CONCAT(code,'-',id) = '".$code."'");
-		$giftcard = $rs->fetchObject();  
+		//   $rs = db_query("select *  from giftcard g 
+  //    where g.state = 1 and g.status = 1 and CONCAT(code,'-',id) = '".$code."'");
+		// $giftcard = $rs->fetchObject();  
+    //$giftcard = giftcard_load_data($code);
 		
 		
 		
@@ -1458,9 +1492,10 @@ function giftcard_discrease_balance_value( $codefull = 0 , $nid = 0  , $charge =
       
     if(!empty($codefull)){
       
-        $rs = db_query("select *  from giftcard g 
-         where g.state = 1 and g.status = 1  and CONCAT(code,'-',id) = '".$codefull."'");
-      	$giftcard = $rs->fetchObject(); 
+       //  $rs = db_query("select *  from giftcard g 
+       //   where g.state = 1 and g.status = 1  and CONCAT(code,'-',id) = '".$codefull."'");
+      	// $giftcard = $rs->fetchObject(); 
+        $giftcard = giftcard_load_data($codefull);
 
     }elseif(!empty($giftid)){
         $rs = db_query("select *  from giftcard g 
@@ -1796,12 +1831,13 @@ if($form_state['values']['amount'] < 5  ){
     form_set_error('newcode', 'Enter a new Gift Card code');
   }
 
-  $sql = "select *  from giftcard g 
-     where g.state = 1 and g.status = 1 and  CONCAT(code,'-',id) = '".$code."'";
-  // drupal_set_message(t($sql), 'status', FALSE);
-  $rs = db_query($sql);
-    
-    $giftcard = $rs->fetchObject();  
+  // $sql = "select *  from giftcard g 
+  //    where g.state = 1 and g.status = 1 and  CONCAT(code,'-',id) = '".$code."'";
+  // $rs = db_query($sql);  
+  // $giftcard = $rs->fetchObject();  
+  $giftcard = giftcard_load_data($code);  
+  
+
     $alert = "";
     
     
@@ -3526,8 +3562,8 @@ $status = $form_state['values']['status'];
 $message_transaction = $form_state['values']['message_transaction'];
 //update trasaction
 $rs  = db_query("UPDATE transaction set 
-                  code_transaction = $code_transaction ,
-                  auth_code = $auth_code , 
+                  code_transaction = '$code_transaction' ,
+                  auth_code = '$auth_code' , 
                   status = $status ,
                   message_transaction = '$message_transaction' 
                   where id = $tranid");
@@ -4178,6 +4214,38 @@ function giftcard_list_orders_add_form($form_state){
   );
   return $form;
 }
+
+
+/*
+Retorna un la data del giftcard como objecto
+Reconoce si tiene codigo completo ($codefull) , o es solo una parte ($code)
+*/
+function giftcard_load_data($codigo_giftcard){
+  
+  $codigo_giftcard = trim($codigo_giftcard);
+
+  list($letra,$code,$id) = explode("-", $codigo_giftcard);
+  
+  $op = "full";
+
+  if(!$id)
+    $op = "short";
+
+
+  if($op == "full"){
+    $rs = db_query("select *  from giftcard g where g.state = 1 and g.status = 1 and  CONCAT(code,'-',id) = '".$codigo_giftcard."'");
+    $giftcard = $rs->fetchObject();
+
+  }else{
+    $rs = db_query("select *  from giftcard g where g.state = 1 and g.status = 1 and  code = '".$codigo_giftcard."'");
+    $giftcard = $rs->fetchObject();
+  }
+
+  return $giftcard;
+
+}
+
+
 
 
 
