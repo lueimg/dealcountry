@@ -46,6 +46,7 @@ function limadot_general_init() {
 
 function limadot_general_views_query_alter(&$view, &$query) { 
 	global $_SESSION;
+	// dsm($query);
 	if ($view->name == 'deals_front') {
    
 		if(isset($query->where[0]['conditions'][1]) && $query->where[0]['conditions'][1]["field"] == "node.title") {
@@ -55,6 +56,14 @@ function limadot_general_views_query_alter(&$view, &$query) {
 
     if(!empty($_REQUEST["field_deal_categories_tid"]) && $_REQUEST["field_deal_categories_tid"] != "All")
       $query->where[0]['conditions'][0]['value'][':field_data_field_deal_categories_field_deal_categories_tid'] = $_REQUEST["field_deal_categories_tid"];
+
+
+  	if(!empty($_REQUEST["title"])){
+  		$query->where[0]['conditions'][1]['operator'] = 'LIKE';
+      	$query->where[0]['conditions'][1]['value'] = '%' . $_REQUEST["title"] . '%';
+      	$query->where[0]['conditions'][1]["field"] = "node.title";
+      	// dsm($_REQUEST["title"]);
+  	}
 
   	
 		$_SESSION["views"]["deals_front"]["page_1"] = $_SESSION["views"]["deals_front"]["default"];
@@ -605,7 +614,7 @@ function limadot_general_fetch_feeds_cron($feednames){
     '@feed' => $feednames,
   );
   $mail = "luismorith@gmail.com";
-  drupal_mail($module, $key, $mail, $language, $params);
+  //drupal_mail($module, $key, $mail, $language, $params);
 
 
       $source->import();
